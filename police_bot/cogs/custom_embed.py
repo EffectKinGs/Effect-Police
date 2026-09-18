@@ -78,9 +78,8 @@ class CustomEmbed(commands.Cog):
 
         await interaction.response.defer(ephemeral=True)
         embed = utils.base_embed(
-            "# — Create Embed",
-            "**<:ETRP_97:1500190884442931271> - اضغط الزر أدناه لإنشاء إمبيد مخصص (عنوان، وصف، صورة). "
-            "يدعم إيموجيات السيرفر مباشرة بالنص.**",
+            "Create Embed",
+            "-# **<:emoji_15:1550308794297356388>  '  هذه اللوحة وعن طريق الزر ادناه ب امكانك انشاء امبيد جديد . **",
             image_url="attachment://evil_town_banner.png",
         )
         await utils.send_panel(interaction.channel, embed, EmbedPanelView(), "evil_town_banner.png")
