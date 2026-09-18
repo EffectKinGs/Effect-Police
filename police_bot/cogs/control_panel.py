@@ -308,7 +308,7 @@ class ControlPanel(commands.Cog):
     "-# ** <:emoji_12:1550308402520133632>   '  Kick **\n"
     "-# <:emoji_14:1550308740551417956>  -  Button Kick / للتوقيف عن العمل و الاقصاء من النظام"
 )
-        embed = utils.base_embed(" ( System )", description)
+        embed = utils.base_embed("System", description)
         await utils.send_panel(interaction.channel, embed, LSPDControlView(), "evil_town_banner.png")
         await utils.send_log(interaction.guild, "LSPD Panel", f"المنفذ: {interaction.user.mention}\nتم نشر لوحة LSPD في {interaction.channel.mention}")
         await interaction.delete_original_response()
