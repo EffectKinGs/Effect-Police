@@ -63,7 +63,7 @@ LINE_IMAGE_AUTO_CHANNEL_IDS = {
 
 # الهوية العامة لجميع اللوحات.
 # الهوية العامة لجميع اللوحات.
-EMBED_COLOR = 0x75FBFD
+EMBED_COLOR = 0x01FFFE
 EMBED_FOOTER = "System Police Effect  ."
 # يُستخدم كمرجع للهوية؛ اللوحات ترفق الأصل المحلي فعلياً عبر send_panel.
 EMBED_IMAGE_URL = "attachment://evil_town_banner.png"
