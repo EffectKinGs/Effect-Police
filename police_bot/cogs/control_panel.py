@@ -299,9 +299,15 @@ class ControlPanel(commands.Cog):
             return
         await interaction.response.defer(ephemeral=True)
         description = (
-            
-            "**<:ETRP_145:1542162076255002624> - For recruitment or to manage the Police Administration System, use the buttons below .**"
-        )
+    "-# ** <:emoji_12:1550308402520133632>  '  LSPD **\n"
+    "-# <:emoji_14:1550308740551417956>  '  Button LSPD : للتوظيف في النظام .\n"
+    "-# ** <:emoji_12:1550308402520133632>   '   Upgrade **\n"
+    "-# <:emoji_14:1550308740551417956>  '  Button Upgrade / للترقية\n"
+    "-# ** <:emoji_12:1550308402520133632>   '  Wing **\n"
+    "-# <:emoji_14:1550308740551417956>  '  Button Wing / ل اعطاء ونق للعسكري .\n"
+    "-# ** <:emoji_12:1550308402520133632>   '  Kick **\n"
+    "-# <:emoji_14:1550308740551417956>  '  Button Kick / للتوقيف عن العمل و الاقصاء من النظام"
+)
         embed = utils.base_embed("EvilTown ( System )", description)
         await utils.send_panel(interaction.channel, embed, LSPDControlView(), "evil_town_banner.png")
         await utils.send_log(interaction.guild, "LSPD Panel", f"المنفذ: {interaction.user.mention}\nتم نشر لوحة LSPD في {interaction.channel.mention}")
