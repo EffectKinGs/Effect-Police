@@ -60,7 +60,7 @@ def panel_title(title: str) -> str:
     clean = title.replace("**", "").strip()
     if clean.startswith("<:emoji_142:"):
         return clean
-    if clean.startswith("Effect King's ("):
+    if clean.startswith("("):
         return f"<:emoji_5:1550307911115218974>  '  {clean}"
     return f"<:emoji_5:1550307911115218974>  '  Effect King's ({clean})"
 
