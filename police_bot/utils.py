@@ -61,7 +61,7 @@ def panel_title(title: str, panel_key: str = "default") -> str:
     emoji = config.PANEL_TITLE_EMOJIS.get(panel_key) or config.PANEL_TITLE_EMOJIS.get("default", "")
     if clean.startswith("("):
         return f"{emoji}  '  {clean}"
-    return f"{emoji}  '   ({clean})"
+    return f"{emoji}  '   {clean}"
 
 
 def base_embed(
