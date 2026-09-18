@@ -303,7 +303,7 @@ class LoginPanel(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="login-panil", description="ينشر لوحة المباشرة الموحدة")
+    @app_commands.command(name="login-panel", description="ينشر لوحه تسجيل الدخول")
     @app_commands.default_permissions(administrator=True)
     async def publish_panel(self, interaction: discord.Interaction):
         if not utils.has_role(interaction.user, "admin"):
