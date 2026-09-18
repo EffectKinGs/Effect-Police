@@ -72,7 +72,7 @@ async def build_duty_embed(guild: discord.Guild) -> discord.Embed:
         "Login",
         "\n".join(description),
         image_url=f"attachment://{config.LOGIN_BANNER_ASSET}",
-        panel_key="<:emoji_25:1550309714330390538> ︲ Effect Police ( Log In ) .",
+        panel_key="login",
     )
 
 
