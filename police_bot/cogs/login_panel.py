@@ -303,7 +303,7 @@ class LoginPanel(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="LogIn_Panil", description="ينشر لوحة المباشرة الموحدة")
+    @app_commands.command(name="LogIn-Panil", description="ينشر لوحة المباشرة الموحدة")
     @app_commands.default_permissions(administrator=True)
     async def publish_panel(self, interaction: discord.Interaction):
         if not utils.has_role(interaction.user, "admin"):
@@ -330,7 +330,7 @@ class LoginPanel(commands.Cog):
         await db.set_setting(_guild_key(PANEL_MESSAGE_KEY, interaction.guild.id), str(message.id))
         await interaction.delete_original_response()
 
-    @app_commands.command(name="Login_On", description="يفتح تسجيل الدخول")
+    @app_commands.command(name="Login-On", description="يفتح تسجيل الدخول")
     @app_commands.default_permissions(administrator=True)
     async def open_login(self, interaction: discord.Interaction):
         if not utils.has_role(interaction.user, "admin"):
@@ -343,7 +343,7 @@ class LoginPanel(commands.Cog):
             await utils.send_log(interaction.guild, "Login Opened", f"المنفذ: {interaction.user.mention}")
         await interaction.followup.send("** <:emoji_5:1550308058448527472>  '  تم فتح تسجيل الدخول . **", ephemeral=True)
 
-    @app_commands.command(name="LogIn_Cloce", description="يقفل تسجيل الدخول ")
+    @app_commands.command(name="LogIn-Cloce", description="يقفل تسجيل الدخول ")
     @app_commands.default_permissions(administrator=True)
     async def close_login(self, interaction: discord.Interaction):
         if not utils.has_role(interaction.user, "admin"):
