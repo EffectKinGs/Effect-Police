@@ -62,7 +62,7 @@ def panel_title(title: str) -> str:
         return clean
     if clean.startswith("("):
         return f"<:emoji_5:1550307911115218974>  '  {clean}"
-    return f"<:emoji_5:1550307911115218974>  '  Effect King's ({clean})"
+    return f"<:emoji_5:1550307911115218974>  '   ({clean})"
 
 
 def base_embed(
