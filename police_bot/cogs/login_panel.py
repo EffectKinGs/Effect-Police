@@ -56,12 +56,12 @@ async def build_duty_embed(guild: discord.Guild) -> discord.Embed:
     rows = await db.get_active_sessions(guild.id)
     count = len(rows)
     description = [
-        f"**<:ETRP_124:1542019164615741530> - عدد الوحدات المتواجدة بالميدان . ( {config.MAX_ACTIVE_OFFICERS}/{count} ) **",
+        f"** <:emoji_13:1550308496216432781>   '   عدد الوحدات المتواجدة بالميدان . ( {config.MAX_ACTIVE_OFFICERS}/{count} ) **",
         "",
     ]
     if not rows:
         description.append("")
-        description.append("-# **<:ETRP_126:1542022499921825875> - لايوجد عسكري في مدينة ( EvilTown ) **")
+        description.append("-# ** <:emoji_21:1550309215162077214>   '   لايوجد عسكري في مدينة ملوك التأثير . **")
     else:
         members = {member.id: member for member in guild.members}
         for row in rows:
@@ -119,10 +119,10 @@ async def _open_login(interaction: discord.Interaction, callsign: str, sector: s
         return
     await interaction.response.defer(ephemeral=True)
     if not await db.is_login_enabled():
-        await _reply(interaction, "🔒 تسجيل الدخول مقفل حالياً.")
+        await _reply(interaction, "**<:emoji_28:1550309826758840500>  '  تسجيل الدخول مُغلق اللان ، انتظر المسوؤلين . **")
         return
     if await db.get_open_session(interaction.guild.id, interaction.user.id):
-        await _reply(interaction, "⚠️ أنت مسجل دخول بالفعل.")
+        await _reply(interaction, "-# **<:emoji_28:1550309826758840500>  '  مسجل دخول ب الفعل ! **")
         return
     count = await db.count_active_sessions(interaction.guild.id)
     if count >= config.MAX_ACTIVE_OFFICERS:
@@ -239,10 +239,10 @@ class LoginPanelView(discord.ui.View):
             return
         await interaction.response.defer(ephemeral=True)
         if status_key == "period_manager" and not utils.is_period_manager(interaction.user):
-            await _reply(interaction, "❌ لا تملك أياً من رتب مسؤولية الفترة المسموحة.")
+            await _reply(interaction, "-# **<:emoji_28:1550309826758840500>  '  ليست من صلاحياتك استلام مسوؤلية الفترة **")
             return
         if not await db.get_open_session(interaction.guild.id, interaction.user.id):
-            await _reply(interaction, "⚠️ سجّل دخولك أولاً.")
+            await _reply(interaction, "-# ** <:emoji_28:1550309826758840500>  '  سجل دخولك اولاً . **")
             return
         responsibility_statuses = {"dispatch", "deputy_dispatch", "period_manager"}
         if status_key in responsibility_statuses:
@@ -250,7 +250,7 @@ class LoginPanelView(discord.ui.View):
             if flags and not flags.get(status_key, False):
                 conflicts = responsibility_statuses - {status_key}
                 if any(flags.get(key, False) for key in conflicts):
-                    await _reply(interaction, "❌ لا يمكن الجمع بين الدسباتش أو نائب الدسباتش أو مسؤولية الفترة. أوقف المسؤولية الحالية أولاً.")
+                    await _reply(interaction, "-# ** <:emoji_28:1550309826758840500>  '  م تقدر تستعمل اكثر من مسوؤلية بالميدان ، اكتفي بواحدة فقط .**")
                     return
         result = await db.toggle_status(interaction.guild.id, interaction.user.id, status_key)
         if result is None:
@@ -273,17 +273,17 @@ class LoginPanelView(discord.ui.View):
             return
         await interaction.response.defer(ephemeral=True)
         if status_key == "period_manager" and not utils.is_period_manager(interaction.user):
-            await _reply(interaction, "❌ لا تملك أياً من رتب مسؤولية الفترة المسموحة.")
+            await _reply(interaction, "-# **<:emoji_28:1550309826758840500>  '  ليست من صلاحياتك استلام مسوؤلية الفترة **")
             return
         if not await db.get_open_session(interaction.guild.id, interaction.user.id):
-            await _reply(interaction, "⚠️ سجّل دخولك أولاً.")
+            await _reply(interaction, "-# ** <:emoji_28:1550309826758840500>  '  سجل دخولك اولاً . **")
             return
         responsibility_statuses = {"dispatch", "deputy_dispatch", "period_manager"}
         if enabled and status_key in responsibility_statuses:
             flags = await db.get_active_flags(interaction.guild.id, interaction.user.id)
             conflicts = responsibility_statuses - {status_key}
             if flags and any(flags.get(key, False) for key in conflicts):
-                await _reply(interaction, "❌ لا يمكن الجمع بين الدسباتش أو نائبه أو مسؤولية الفترة. أوقف المسؤولية الحالية أولاً.")
+                await _reply(interaction, "-# ** <:emoji_28:1550309826758840500>  '  م تقدر تستعمل اكثر من مسوؤلية بالميدان ، اكتفي بواحدة فقط .**")
                 return
         result = await db.set_status(interaction.guild.id, interaction.user.id, status_key, enabled)
         if result is None:
@@ -303,14 +303,14 @@ class LoginPanel(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="نشر_لوحة_الدخول", description="ينشر لوحة المباشرة الموحدة")
+    @app_commands.command(name="LogIn_Panil", description="ينشر لوحة المباشرة الموحدة")
     @app_commands.default_permissions(administrator=True)
     async def publish_panel(self, interaction: discord.Interaction):
         if not utils.has_role(interaction.user, "admin"):
-            await interaction.response.send_message("❌ لا تملك صلاحية استخدام هذا الأمر.", ephemeral=True)
+            await interaction.response.send_message("-# **<:emoji_28:1550309826758840500>  '  ليست من صلاحياتك نشرها **", ephemeral=True)
             return
         if interaction.guild is None or not isinstance(interaction.channel, discord.TextChannel):
-            await interaction.response.send_message("❌ اختر قناة نصية داخل السيرفر.", ephemeral=True)
+            await interaction.response.send_message("-# **<:emoji_14:1550308740551417956>   '  قم ب اختيار الروم **", ephemeral=True)
             return
 
         await interaction.response.defer(ephemeral=True)
@@ -330,33 +330,33 @@ class LoginPanel(commands.Cog):
         await db.set_setting(_guild_key(PANEL_MESSAGE_KEY, interaction.guild.id), str(message.id))
         await interaction.delete_original_response()
 
-    @app_commands.command(name="فتح_تسجيل_الدخول", description="يفتح تسجيل الدخول")
+    @app_commands.command(name="Login_On", description="يفتح تسجيل الدخول")
     @app_commands.default_permissions(administrator=True)
     async def open_login(self, interaction: discord.Interaction):
         if not utils.has_role(interaction.user, "admin"):
-            await interaction.response.send_message("❌ لا تملك صلاحية استخدام هذا الأمر.", ephemeral=True)
+            await interaction.response.send_message("-# **<:emoji_28:1550309826758840500>  '  ليست من صلاحياتك نشرها **", ephemeral=True)
             return
         await interaction.response.defer(ephemeral=True)
         await db.set_login_enabled(True)
         if interaction.guild:
             await refresh_duty_panel(interaction.guild)
             await utils.send_log(interaction.guild, "Login Opened", f"المنفذ: {interaction.user.mention}")
-        await interaction.followup.send("🟢 تم فتح تسجيل الدخول.", ephemeral=True)
+        await interaction.followup.send("** <:emoji_5:1550308058448527472>  '  تم فتح تسجيل الدخول . **", ephemeral=True)
 
-    @app_commands.command(name="قفل_تسجيل_الدخول", description="يقفل تسجيل الدخول الجديد")
+    @app_commands.command(name="LogIn_Cloce", description="يقفل تسجيل الدخول ")
     @app_commands.default_permissions(administrator=True)
     async def close_login(self, interaction: discord.Interaction):
         if not utils.has_role(interaction.user, "admin"):
-            await interaction.response.send_message("❌ لا تملك صلاحية استخدام هذا الأمر.", ephemeral=True)
+            await interaction.response.send_message("-# **<:emoji_28:1550309826758840500>  '  ليست من صلاحياتك نشرها **", ephemeral=True)
             return
         await interaction.response.defer(ephemeral=True)
         await db.set_login_enabled(False)
         if interaction.guild:
             await refresh_duty_panel(interaction.guild)
             await utils.send_log(interaction.guild, "Login Closed", f"المنفذ: {interaction.user.mention}")
-        await interaction.followup.send("🔒 تم قفل تسجيل الدخول الجديد.", ephemeral=True)
+        await interaction.followup.send("**<:emoji_6:1550308073531252878>  '  تم قفل تسجيل الدخول . **", ephemeral=True)
 
-    @app_commands.command(name="حالة_المباشرة", description="يحدّث لوحة المباشرة الموحدة")
+    @app_commands.command(name="حالة_المباشرة", description="يحدّث لوحة اللوق ان  ")
     @app_commands.default_permissions(administrator=True)
     async def refresh_panel(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -366,14 +366,7 @@ class LoginPanel(commands.Cog):
         if updated:
             await interaction.delete_original_response()
         else:
-            await interaction.followup.send("⚠️ انشر اللوحة أولاً.", ephemeral=True)
-
-    @app_commands.command(name="مدتي", description="يعرض إجمالي وقت مباشرتك")
-    async def my_duration(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
-        total = await db.total_duration_seconds(interaction.user.id, interaction.guild.id if interaction.guild else None)
-        await interaction.followup.send(embed=utils.base_embed("⏱️ إجمالي مدة مباشرتك", utils.format_duration(total)), ephemeral=True)
-
+            await interaction.followup.send(" انشر اللوحة أولاً.", ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(LoginPanel(bot))
