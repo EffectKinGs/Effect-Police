@@ -208,7 +208,7 @@ class Submits(commands.Cog):
             "Division, Where You Can Serve And Protect Your Nation While Leaving Your Mark Within Its Ranks .**"
         )
         embed = utils.base_embed(
-            "<:emoji_39:1550337741936394380>︲ Effect Police ( SuBmits )",
+            "<:emoji_39:1550337741936394380>︲Effect Police ( SuBmits )",
             description,
             image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
         )
