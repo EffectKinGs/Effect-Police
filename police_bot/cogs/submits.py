@@ -65,7 +65,7 @@ class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( �
             f"<:emoji_27:1550309790163664906> ︲ Experience : {experience}\n"
             "**"
         )
-        embed = utils.base_embed("<:emoji_39:1550337741936394380> ︲ Effect Police ( SuBmits ) .", description, image_url="")
+        embed = utils.base_embed("<:emoji_39:1550337741936394380> ︲ Effect Police ( SuBmits )", description, image_url="")
         target_channel = await _get_review_channel(interaction.guild) or interaction.channel
 
         try:
