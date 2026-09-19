@@ -58,7 +58,7 @@ class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( �
 
         description = (
             "**\n"
-            "<:ETRP_28:1499883636110135476> - New Military Application **\n"
+            "<:emoji_15:1550308794297356388> - New Military Application **\n"
             "**\n"
             f"<:emoji_9:1550308305014882344> ︲ Name : {name}\n"
             f"<:emoji_13:1550308496216432781> ︲Age : {age}\n"
@@ -207,7 +207,11 @@ class Submits(commands.Cog):
             "**<:emoji_5:1550307911115218974> - Welcome To The Effect King's Police Department Application "
             "Division, Where You Can Serve And Protect Your Nation While Leaving Your Mark Within Its Ranks .**"
         )
-        embed = utils.base_embed("Submits", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
+        embed = utils.base_embed(
+            "<:emoji_39:1550337741936394380> ︲ Effect Police ( SuBmits ) .",
+            description,
+            image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
+        )
         await utils.send_panel(interaction.channel, embed, SubmissionPanelView(), config.PANEL_BANNER_ASSET)
         await utils.send_log(
             interaction.guild, "Submits Panel",
