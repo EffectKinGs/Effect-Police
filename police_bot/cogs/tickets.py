@@ -154,9 +154,13 @@ class Tickets(commands.Cog):
             return
 
         embed = utils.base_embed(
-            "# — الدعم والتذاكر", "اختر نوع طلبك من القائمة أدناه لفتح تذكرة خاصة.",
-            image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
-        )
+    "<:emoji_35:1550311965023273112> ︲ Police Support .",
+    (
+        "-# ** <:emoji_27:1550309790163664906>  '  Select The Type Of Ticket You Want To Open .**\n"
+        "-# **<:emoji_5:1550307911115218974>  '  Ticket** / عليك الالتزام بالانظمه والقوانين وعدم كثرة المنشن"
+    ),
+    image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
+)
         await utils.send_panel(interaction.channel, embed, TicketPanelView(ticket_types), config.PANEL_BANNER_ASSET)
         await db.set_setting("tickets_channel_id", str(interaction.channel.id))
         await interaction.delete_original_response()
