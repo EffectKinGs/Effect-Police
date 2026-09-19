@@ -60,23 +60,23 @@ class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( �
             "**\n"
             "<:ETRP_28:1499883636110135476> - New Military Application **\n"
             "**\n"
-            f"<:ETRP_108:1500486542031065253> - Name : {name}\n"
-            f"<:ETRP_108:1500486542031065253> - Age : {age}\n"
-            f"<:ETRP_108:1500486542031065253> - Experience : {experience}\n"
+            f"<:emoji_9:1550308305014882344> ︲ Name : {name}\n"
+            f"<:emoji_13:1550308496216432781> ︲Age : {age}\n"
+            f"<:emoji_27:1550309790163664906> ︲ Experience : {experience}\n"
             "**"
         )
-        embed = utils.base_embed("Submits", description, image_url="")
+        embed = utils.base_embed("<:emoji_39:1550337741936394380> ︲ Effect Police ( SuBmits ) .", description, image_url="")
         target_channel = await _get_review_channel(interaction.guild) or interaction.channel
 
         try:
             await target_channel.send(
-                content=f"|| <@&1545578088631377960> || {interaction.user.mention}",
+                content=f"|| <@&1511976724240535704> || {interaction.user.mention}",
                 embed=embed,
                 view=SubmissionReviewView(),
                 allowed_mentions=discord.AllowedMentions(users=True),
             )
         except (discord.Forbidden, discord.HTTPException):
-            await interaction.followup.send("⚠️ تعذر إرسال طلبك، حاول لاحقًا.", ephemeral=True)
+            await interaction.followup.send(" تعذر إرسال طلبك، حاول لاحقًا.", ephemeral=True)
             return
 
         pending_role = interaction.guild.get_role(config.SUBMISSION_PENDING_ROLE_ID)
@@ -86,7 +86,7 @@ class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( �
             except discord.Forbidden:
                 pass
 
-        await interaction.followup.send("**<:ETRP_80:1500187130729730050> - Your Application Has Been Submitted. Please Be Patient . **", ephemeral=True)
+        await interaction.followup.send("**<:emoji_12:1550308402520133632> ︲ Your Application Has Been Submitted. Please Be Patient . **", ephemeral=True)
 
 
 class SubmissionReviewView(discord.ui.View):
@@ -146,14 +146,14 @@ class SubmissionReviewView(discord.ui.View):
 
         if accepted:
             description = (
-                "** <:ETRP_151:1542169695258419270> - ادارة شرطة ايفل تاون تُبارك لك بقبولك . **\n"
-                "** <:ETRP_141:1542161889038172180> - و مُتمنين لك التوفيق في التدريب العسكري القادم . **"
+                "** <a:MTRP:1394930696535015576> - ادارة شرطة ايفل تاون تُبارك لك بقبولك . **\n"
+                "** <a:MTRP:1394920520134426636> - و مُتمنين لك التوفيق في التدريب العسكري القادم . **"
             )
             result_embed = utils.base_embed("Accept", description, image_url="")
         else:
             description = (
-                "   **<:ETRP_124:1542019164615741530> - أدارة شرطة ايفل تاون تود ابلاغك برفض طلبك **\n"
-                "-# **<:ETRP_141:1542161889038172180> - و مُتمنين لك التوفيق في المرات المُقبلة . **"
+                "   **<a:MTRP:1394930696535015576> - أدارة شرطة ايفل تاون تود ابلاغك برفض طلبك **\n"
+                "-# **<a:MTRP:1394920520134426636> - و مُتمنين لك التوفيق في المرات المُقبلة . **"
             )
             result_embed = utils.base_embed("Reject", description, image_url="")
         await utils.send_log_embed(interaction.guild, result_embed)
@@ -179,9 +179,7 @@ class SubmissionPanelView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Submits", style=discord.ButtonStyle.secondary, custom_id="submits_panel:open")
-    async def open_submit(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_modal(SubmitModal())
+    @discord.ui.button(label="Submits", style=discord.ButtonStyle.secondary, custom_id="submits_panel:open", emoji="<:emoji_19:1550309019938459761>")
 
 
 class Submits(commands.Cog):
@@ -204,7 +202,7 @@ class Submits(commands.Cog):
             await db.set_setting(_REVIEW_CHANNEL_KEY.format(guild_id=interaction.guild.id), str(review_channel.id))
 
         description = (
-            "**<:ETRP_28:1499883636110135476> - Welcome To The Effect King's Police Department Application "
+            "**<:emoji_5:1550307911115218974> - Welcome To The Effect King's Police Department Application "
             "Division, Where You Can Serve And Protect Your Nation While Leaving Your Mark Within Its Ranks .**"
         )
         embed = utils.base_embed("Submits", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
