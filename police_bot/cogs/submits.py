@@ -180,6 +180,8 @@ class SubmissionPanelView(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(label="Submits", style=discord.ButtonStyle.secondary, custom_id="submits_panel:open", emoji="<:emoji_19:1550309019938459761>")
+    async def open_submit(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(SubmitModal())
 
 
 class Submits(commands.Cog):
