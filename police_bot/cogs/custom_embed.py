@@ -15,13 +15,13 @@ class CreateEmbedModal(discord.ui.Modal, title="𝗖𝗿𝗲𝗮𝘁𝗲 𝗘�
         super().__init__()
         self.embed_title = discord.ui.TextInput(placeholder="", required=True, max_length=256)
         self.embed_description = discord.ui.TextInput(
-            placeholder="يدعم إيموجيات السيرفر مباشرة بصيغة <:name:id>",
+            placeholder="",
             required=True, max_length=4000, style=discord.TextStyle.paragraph,
         )
         self.image_url = discord.ui.TextInput(placeholder="رابط صورة (اختياري)", required=False, max_length=500)
         self.add_item(discord.ui.Label(text="عنوان الإمبيد (يطلع فوق)", component=self.embed_title))
         self.add_item(discord.ui.Label(text="وصف الإمبيد", component=self.embed_description))
-        self.add_item(discord.ui.Label(text="رابط صورة (اختياري)", component=self.image_url))
+        self.add_item(discord.ui.Label(text="", component=self.image_url))
 
     async def on_submit(self, interaction: discord.Interaction):
         if interaction.guild is None or not isinstance(interaction.channel, discord.TextChannel):
@@ -78,7 +78,7 @@ class CustomEmbed(commands.Cog):
 
         await interaction.response.defer(ephemeral=True)
         embed = utils.base_embed(
-            "Create Embed",
+            "<:emoji_19:1550309019938459761> ︲ Create EmBed .",
             "-# **<:emoji_15:1550308794297356388>  '  هذه اللوحة وعن طريق الزر ادناه ب امكانك انشاء امبيد جديد . **",
             image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
         )
