@@ -106,7 +106,8 @@ class Clothing(commands.Cog):
             )
             return
 
-        embed = utils.base_embed("Clothing ", "** <:ETRP_97:1500190884442931271> - The complete military vest is available here . **", image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
+        embed = utils.base_embed("<a:MTRP:1550940537492865124>
+ ︲ Police ClotHing .", "** <:emoji_14:1550308740551417956> ︲ The complete military vest is available here . **", image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
         await utils.send_panel(interaction.channel, embed, ClothingPanelView(items), config.PANEL_BANNER_ASSET)
         await db.set_setting("clothing_channel_id", str(interaction.channel.id))
         await interaction.delete_original_response()
