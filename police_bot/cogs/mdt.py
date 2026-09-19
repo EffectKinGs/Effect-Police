@@ -351,7 +351,6 @@ class MDT(commands.Cog):
         await db.set_setting(_channel_key("suspect_statement", interaction.guild.id), str(statement_channel.id))
 
         description = (
-            "** <:ETRP_108:1500486542031065253>  '  From Here, You Can Record Impound Violations . **\n\n"
             "<:emoji_13:1550308496216432781>︲ **MDT .**\n"
             "<:emoji_28:1550309826758840500> ︲**Mdt / ** تُستعمل للمخالفات بشكل عام ضد الشخص الجاني .\n\n"
             "<:emoji_13:1550308496216432781>︲ **Vehicle Impound .**\n"
