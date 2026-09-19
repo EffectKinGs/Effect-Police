@@ -106,13 +106,31 @@ class Clothing(commands.Cog):
             )
             return
 
-        embed = utils.base_embed("<a:MTRP:1550940537492865124>
- ︲ Police ClotHing .", "** <:emoji_14:1550308740551417956> ︲ The complete military vest is available here . **", image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
-        await utils.send_panel(interaction.channel, embed, ClothingPanelView(items), config.PANEL_BANNER_ASSET)
-        await db.set_setting("clothing_channel_id", str(interaction.channel.id))
-        await interaction.delete_original_response()
-        if interaction.guild:
-            await utils.send_log(interaction.guild, "Clothing Panel", f"المنفذ: {interaction.user.mention}\nالقناة: {interaction.channel.mention}")
+        embed = utils.base_embed(
+    "<a:MTRP:1550940537492865124> ︲ Police ClotHing .",
+    "** <:emoji_14:1550308740551417956> ︲ The complete military vest is available here . **",
+    image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
+)
+
+await utils.send_panel(
+    interaction.channel,
+    embed,
+    ClothingPanelView(items),
+    config.PANEL_BANNER_ASSET,
+)
+await db.set_setting("clothing_channel_id", str(interaction.channel.id))
+await interaction.delete_original_response()
+
+if interaction.guild:
+    await utils.send_log(
+        interaction.guild,
+        "Clothing Panel",
+        f"المنفذ: {interaction.user.mention}\nالقناة: {interaction.channel.mention}",
+    )
+
+
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Clothing(bot))
 
 
 async def setup(bot: commands.Bot):
