@@ -350,11 +350,34 @@ class MDT(commands.Cog):
         await db.set_setting(_channel_key("vehicle_impound", interaction.guild.id), str(vehicle_channel.id))
         await db.set_setting(_channel_key("suspect_statement", interaction.guild.id), str(statement_channel.id))
 
-        description = (
-            "**<:ETRP_108:1500486542031065253>  '  From Here, You Can Record Impound Violations . **"
+        # ====== النص الطويل (Subtext) — يرسل كـ content فوق الـ Embed ======
+        content_text = (
+            "-# ** <:emoji_13:1550308496216432781>︲ MDT . **\n"
+            "-# <:emoji_28:1550309826758840500> ︲**Mdt / ** تُستعمل للمخالفات بشكل عام ضد الشخص الجاني .\n\n"
+            "-# ** <:emoji_13:1550308496216432781>︲ Vehicle Impound .**\n"
+            "-# <:emoji_28:1550309826758840500> ︲**Vehicle Impound . / ** تُستعمل لحجز المركبات المُخالفة .\n\n"
+            "-# ** <:emoji_13:1550308496216432781>︲ SusPect Statement .**\n"
+            "-# <:emoji_28:1550309826758840500> ︲ **SusPect Statement . / ** تُستعمل لتسجيل اقوال المُتهم .\n\n"
+            "-# ** <:emoji_21:1550309215162077214> ︲مُلاحظات هامة . **\n\n"
+            "-# <:emoji_14:1550308740551417956> ︲جميع الازرار تُستعمل في الحالات الجنائية مو بكل الحالات تنزلها ، ب استثناء ال  ( **MDT **) .\n"
+            "-# <:emoji_14:1550308740551417956> ︲ في حال نزلت السجل ب الشكل السليم **سيتم اعطائك نقاطها من الخادم بدون المُطالبه فيها .**"
         )
-        embed = utils.base_embed("MDT System", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
-        await utils.send_panel(interaction.channel, embed, MDTPanelView(), config.PANEL_BANNER_ASSET)
+
+        # ====== الـ Embed الأساسي ======
+        embed = utils.base_embed(
+            "<:emoji_45:1550961724331397231> ︲ MDT RecorDs .",
+            "** <:ETRP_108:1500486542031065253>  '  From Here, You Can Record Impound Violations . **",
+            image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
+        )
+
+        # ====== إرسال المحتوى (Subtext) + الـ Embed + الأزرار في رسالة واحدة ======
+        file = discord.File(config.PANEL_BANNER_ASSET, filename=config.PANEL_BANNER_ASSET)
+        await interaction.channel.send(
+            content=content_text,
+            embed=embed,
+            view=MDTPanelView(),
+            file=file,
+        )
 
         await utils.send_log(
             interaction.guild, "MDT Panel",
