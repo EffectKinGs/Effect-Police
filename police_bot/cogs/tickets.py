@@ -154,7 +154,7 @@ class Tickets(commands.Cog):
             return
 
         embed = utils.base_embed(
-    "<a:MTRP:1394920520134426636> ︲ Police Support .",
+    "<a:emoji_29:1550940499995660338> ︲ Police Support .",
     (
         "-# ** <:emoji_27:1550309790163664906>  '  Select The Type Of Ticket You Want To Open .**\n"
         "-# **<:emoji_5:1550307911115218974>  '  Ticket** / عليك الالتزام بالانظمه والقوانين وعدم كثرة المنشن"
