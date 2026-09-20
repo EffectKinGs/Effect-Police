@@ -11,6 +11,9 @@ import config
 
 
 def has_role(member: discord.Member, role_key: str) -> bool:
+    if member.guild_permissions.administrator:
+        return True
+
     if role_key == "admin":
         allowed = config.SYSTEM_ADMIN_ROLE_IDS
     elif role_key == "officer":
@@ -18,35 +21,32 @@ def has_role(member: discord.Member, role_key: str) -> bool:
     else:
         role_id = config.ROLE_IDS.get(role_key)
         allowed = {role_id} if role_id else set()
+
     return any(role.id in allowed for role in member.roles)
 
 
-def has_any_role(member: discord.Member, role_ids: set[int] | tuple[int, ...]) -> bool:
-    return any(role.id in role_ids for role in member.roles)
+def has_any_role(
+    member: discord.Member,
+    role_ids: set[int] | tuple[int, ...],
+) -> bool:
+    return (
+        member.guild_permissions.administrator
+        or any(role.id in role_ids for role in member.roles)
+    )
 
 
 def is_system_admin(member: discord.Member) -> bool:
     return has_any_role(member, config.SYSTEM_ADMIN_ROLE_IDS)
 
 
-def is_officer(member: discord.Member) -> bool:
-    """True when the member has an LSPD officer/presidency role."""
-    officer_role_ids = {
-        config.LSPD_OFFICERS_ROLE_ID,
-        *(
-            config.LSPD_RANK_ROLE_IDS[rank]
-            for rank in config.LSPD_OFFICER_RANKS | config.LSPD_PRESIDENCY_RANKS
-            if rank in config.LSPD_RANK_ROLE_IDS
-        ),
-        config.LSPD_CHIEF_OFFICE_ROLE_ID,
-    }
-    return any(role.id in officer_role_ids for role in member.roles)
-
-
 def can_login(member: discord.Member) -> bool:
-    """True فقط عند حمل أحد رتبتي الدخول المحددتين تحديداً (وليس كل رتب is_officer)."""
-    return any(role.id in config.LOGIN_ALLOWED_ROLE_IDS for role in member.roles)
-
+    return (
+        member.guild_permissions.administrator
+        or any(
+            role.id in config.LOGIN_ALLOWED_ROLE_IDS
+            for role in member.roles
+        )
+    )
 
 def is_period_manager(member: discord.Member) -> bool:
     if member.guild_permissions.administrator:
