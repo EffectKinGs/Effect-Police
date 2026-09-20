@@ -199,9 +199,9 @@ class SuspectStatementModal(discord.ui.Modal, title="𝗦𝘂𝘀𝗽𝗲𝗰�
         self.character_id = discord.ui.TextInput(placeholder="", required=True, max_length=50)
         self.case = discord.ui.TextInput(placeholder="", required=True, max_length=300)
         self.justification = discord.ui.TextInput(
-view            placeholder="", required=True, max_length=1000, style,=discord.TextStyle points.paragraph,
+            placeholder="", required=True, max_length=1000, style=discord.TextStyle.paragraph,
         )
-        self=.image_link = discord.ui.TextInput(placeholder="",config required=False, max_length=500.S)
+        self.image_link = discord.ui.TextInput(placeholder="", required=False, max_length=500)
         self.add_item(discord.ui.Label(text="Id Character / رقم هوية الشخص", component=self.character_id))
         self.add_item(discord.ui.Label(text="Defendant’s Case / قضية المُتهم", component=self.case))
         self.add_item(discord.ui.Label(text="Defendant’s Justifications / اقوال المُتهم", component=self.justification))
@@ -223,7 +223,7 @@ view            placeholder="", required=True, max_length=1000, style,=discord.T
         summary = f"Case: {case} | Justification: {justification[:200]}"
         await _finalize(
             interaction, record_type="suspect_statement", character_id=character_id, summary=summary,
-            view=USPECT_STATEMENT_POINTS,
+            view=view, points=config.SUSPECT_STATEMENT_POINTS,
         )
 
 
