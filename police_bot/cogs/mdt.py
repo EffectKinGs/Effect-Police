@@ -63,11 +63,12 @@ def _vehicle_impound_embed(admin_mention, character_id: str, vehicle_type: str, 
     return embed
 
 
-def _suspect_statement_embed(character_id: str, case: str, justification: str, image_link: str) -> discord.Embed:
+def _suspect_statement_embed(admin_mention, character_id: str, case: str, justification: str, image_link: str) -> discord.Embed:
     description = (
-        f"**1 - <:ETRP_145:1542162076255002624>  '  Id Character : {character_id} **\n"
-        f"**2 - <:GCRP:1542924036458287135>  '  Defendant’s Case : {case} **\n"
-        f"**3 - <:ETRP_139:1542161823128756335>  '  Defendant’s Justifications : {justification} **"
+        f"**1 - <:emoji_38:1550334422274801664>︲Mention the official : {admin_mention} **\n"
+        f"**2 - <:emoji_13:1550308496216432781>︲ Id Character : {character_id} **\n"
+        f"**3 - <:GCRP:1542924036458287135>  '  Defendant’s Case : {case} **\n"
+        f"**4 - <:ETRP_139:1542161823128756335>  '  Defendant’s Justifications : {justification} **"
     )
     embed = utils.base_embed("Suspect Statement", description, image_url="")
     if image_link:
@@ -132,7 +133,7 @@ class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
         fine = str(self.fine).strip()
         image_link = str(self.image_link).strip()
 
-        admin_mention = interaction.user.mention  # ← المنشن الرسمي للشخص اللي نزّل الأمر
+        admin_mention = interaction.user.mention
 
         embed = _mdt_embed(admin_mention, character_id, charge, duration, fine, image_link)
         summary = f"Charge: {charge} | Sentence: {duration} | Fine: {fine}"
@@ -168,7 +169,9 @@ class VehicleImpoundModal(discord.ui.Modal, title="𝗩𝗲𝗵𝗶𝗰𝗹𝗲 
         charge = str(self.charge).strip()
         image_link = str(self.image_link).strip()
 
-        embed = _vehicle_impound_embed(character_id, vehicle_type, plate, charge, image_link)
+        admin_mention = interaction.user.mention
+
+        embed = _vehicle_impound_embed(admin_mention, character_id, vehicle_type, plate, charge, image_link)
         summary = f"Vehicle: {vehicle_type} | Plate: {plate} | Charge: {charge}"
         await _finalize(
             interaction, record_type="vehicle_impound", character_id=character_id, summary=summary,
@@ -201,7 +204,9 @@ class SuspectStatementModal(discord.ui.Modal, title="𝗦𝘂𝘀𝗽𝗲𝗰�
         justification = str(self.justification).strip()
         image_link = str(self.image_link).strip()
 
-        embed = _suspect_statement_embed(character_id, case, justification, image_link)
+        admin_mention = interaction.user.mention
+
+        embed = _suspect_statement_embed(admin_mention, character_id, case, justification, image_link)
         summary = f"Case: {case} | Justification: {justification[:200]}"
         await _finalize(
             interaction, record_type="suspect_statement", character_id=character_id, summary=summary,
