@@ -35,8 +35,14 @@ class QuickImage(commands.Cog):
             return
         if not isinstance(message.author, discord.Member):
             return
-        if not any(role.id in config.LINE_IMAGE_ROLE_IDS for role in message.author.roles):
-            return
+        if (
+    not message.author.guild_permissions.administrator
+    and not any(
+        role.id in config.LINE_IMAGE_ROLE_IDS
+        for role in message.author.roles
+    )
+):
+    return
 
         sent = await self._send_image(message.channel)
         if not sent:
