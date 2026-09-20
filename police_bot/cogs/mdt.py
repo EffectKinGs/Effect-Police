@@ -27,7 +27,7 @@ async def _get_target_channel(guild: discord.Guild, record_type: str) -> discord
     return channel if isinstance(channel, discord.TextChannel) else None
 
 
-def _mdt_view_v2(admin_mention: str, character_id: str, charge: str, duration: str, fine: str, image_link: str) -> discord.ui.LayoutView:
+def _mdt_view_v2(admin_mention: str, character_id: str, suspect_name: str, charge: str, fine: str, image_link: str) -> discord.ui.LayoutView:
     view = discord.ui.LayoutView(timeout=None)
     container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
     container.add_item(discord.ui.TextDisplay(
@@ -37,8 +37,8 @@ def _mdt_view_v2(admin_mention: str, character_id: str, charge: str, duration: s
     container.add_item(discord.ui.TextDisplay(
         f"**1 - <:emoji_38:1550334422274801664>︲ Mention the official : ** {admin_mention}\n"
         f"**2 - <:emoji_13:1550308496216432781>︲ Id Character : ** {character_id}\n"
-        f"**3 - <:emoji_14:1550308740551417956>︲ Person’s Charge : ** {charge}\n"
-        f"**4 - <:emoji_31:1550311895594963094>︲ Sentence Duration : ** {duration}\n"
+        f"**3 - <:emoji_14:1550308740551417956>︲ Suspect Name : ** {suspect_name}\n"
+        f"**4 - <:emoji_14:1550308740551417956>︲ Person’s Charge : ** {charge}\n"
         f"**5 - <:emoji_14:1550308636214169610>︲ Financial Fine : ** {fine}"
     ))
     if image_link:
@@ -49,7 +49,7 @@ def _mdt_view_v2(admin_mention: str, character_id: str, charge: str, duration: s
     return view
 
 
-def _vehicle_impound_view_v2(admin_mention: str, character_id: str, vehicle_type: str, plate: str, charge: str, image_link: str) -> discord.ui.LayoutView:
+def _vehicle_impound_view_v2(admin_mention: str, character_id: str, suspect_name: str, vehicle_type: str, plate: str, charge: str, image_link: str) -> discord.ui.LayoutView:
     view = discord.ui.LayoutView(timeout=None)
     container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
     container.add_item(discord.ui.TextDisplay(
@@ -59,9 +59,10 @@ def _vehicle_impound_view_v2(admin_mention: str, character_id: str, vehicle_type
     container.add_item(discord.ui.TextDisplay(
         f"**1 - <:emoji_38:1550334422274801664>︲ Mention the official : ** {admin_mention}\n"
         f"**2 - <:emoji_13:1550308496216432781>︲ Id Character : ** {character_id}\n"
-        f"**3 - <:emoji_131:1551326444565831813>︲ Offending Vehicle Type : ** {vehicle_type}\n"
-        f"**4 - <:emoji_39:1550337741936394380>︲ Vehicle Plate Number : ** {plate}\n"
-        f"**5 - <:FaLcoN:1551327269493153887>︲ Recorded Charge : ** {charge}"
+        f"**3 - <:emoji_14:1550308740551417956>︲ Suspect Name : ** {suspect_name}\n"
+        f"**4 - <:emoji_131:1551326444565831813>︲ Offending Vehicle Type : ** {vehicle_type}\n"
+        f"**5 - <:emoji_39:1550337741936394380>︲ Vehicle Plate Number : ** {plate}\n"
+        f"**6 - <:FaLcoN:1551327269493153887>︲ Recorded Charge : ** {charge}"
     ))
     if image_link:
         container.add_item(discord.ui.MediaGallery(
@@ -71,7 +72,7 @@ def _vehicle_impound_view_v2(admin_mention: str, character_id: str, vehicle_type
     return view
 
 
-def _suspect_statement_view_v2(admin_mention: str, character_id: str, case: str, justification: str, image_link: str) -> discord.ui.LayoutView:
+def _suspect_statement_view_v2(admin_mention: str, character_id: str, suspect_name: str, case: str, justification: str, image_link: str) -> discord.ui.LayoutView:
     view = discord.ui.LayoutView(timeout=None)
     container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
     container.add_item(discord.ui.TextDisplay(
@@ -79,10 +80,11 @@ def _suspect_statement_view_v2(admin_mention: str, character_id: str, case: str,
     ))
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
-        f"**1 - <:emoji_38:1550334422274801664>︲Mention the official : ** {admin_mention}\n"
-        f"**2 - <:emoji_13:1550308496216432781>︲Id Character : ** {character_id}\n"
-        f"**3 - <:emoji:1551351828774522952>︲Defendant’s Case : ** {case}\n"
-        f"**4 - <:ETRP_139:1542161823128756335>︲Defendant’s Justifications : ** {justification}"
+        f"**1 - <:emoji_38:1550334422274801664>︲ Mention the official : ** {admin_mention}\n"
+        f"**2 - <:emoji_13:1550308496216432781>︲ Id Character : ** {character_id}\n"
+        f"**3 - <:emoji_14:1550308740551417956>︲ Suspect Name : ** {suspect_name}\n"
+        f"**4 - <:emoji:1551351828774522952>︲ Defendant’s Case : ** {case}\n"
+        f"**5 - <a:emoji_41:1550934952793612399>︲ Defendant’s Justifications : ** {justification}"
     ))
     if image_link:
         container.add_item(discord.ui.MediaGallery(
@@ -124,13 +126,13 @@ class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
     def __init__(self):
         super().__init__()
         self.character_id = discord.ui.TextInput(placeholder="", required=True, max_length=50)
+        self.suspect_name = discord.ui.TextInput(placeholder="", required=True, max_length=100)
         self.charge = discord.ui.TextInput(placeholder="", required=True, max_length=300)
-        self.duration = discord.ui.TextInput(placeholder="", required=True, max_length=100)
         self.fine = discord.ui.TextInput(placeholder="", required=True, max_length=100)
         self.image_link = discord.ui.TextInput(placeholder="", required=False, max_length=500)
         self.add_item(discord.ui.Label(text="Id Character / رقم هوية الشخص", component=self.character_id))
+        self.add_item(discord.ui.Label(text="Suspect Name / اسم المُتهم", component=self.suspect_name))
         self.add_item(discord.ui.Label(text="Person’s Charge / تُهمة الشخص", component=self.charge))
-        self.add_item(discord.ui.Label(text="Sentence Duration / مُدة سجن الشخص", component=self.duration))
         self.add_item(discord.ui.Label(text="Financial Fine / الغرامة المالية", component=self.fine))
         self.add_item(discord.ui.Label(text="Image Link / رابط صورة لوجه المُتهم", component=self.image_link))
 
@@ -141,14 +143,14 @@ class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
         await interaction.response.defer(ephemeral=True)
 
         character_id = str(self.character_id).strip()
+        suspect_name = str(self.suspect_name).strip()
         charge = str(self.charge).strip()
-        duration = str(self.duration).strip()
         fine = str(self.fine).strip()
         image_link = str(self.image_link).strip()
         admin_mention = interaction.user.mention
 
-        view = _mdt_view_v2(admin_mention, character_id, charge, duration, fine, image_link)
-        summary = f"Charge: {charge} | Sentence: {duration} | Fine: {fine}"
+        view = _mdt_view_v2(admin_mention, character_id, suspect_name, charge, fine, image_link)
+        summary = f"Suspect: {suspect_name} | Charge: {charge} | Fine: {fine}"
         await _finalize(
             interaction, record_type="mdt", character_id=character_id, summary=summary,
             view=view, points=config.MDT_POINTS,
@@ -159,11 +161,13 @@ class VehicleImpoundModal(discord.ui.Modal, title="𝗩𝗲𝗵𝗶𝗰𝗹𝗲 
     def __init__(self):
         super().__init__()
         self.character_id = discord.ui.TextInput(placeholder="", required=True, max_length=50)
+        self.suspect_name = discord.ui.TextInput(placeholder="", required=True, max_length=100)
         self.vehicle_type = discord.ui.TextInput(placeholder="", required=True, max_length=100)
         self.plate = discord.ui.TextInput(placeholder="", required=True, max_length=50)
         self.charge = discord.ui.TextInput(placeholder="", required=True, max_length=300)
         self.image_link = discord.ui.TextInput(placeholder="", required=False, max_length=500)
         self.add_item(discord.ui.Label(text="Id Character / رقم هوية الشخص", component=self.character_id))
+        self.add_item(discord.ui.Label(text="Suspect Name / اسم المُتهم", component=self.suspect_name))
         self.add_item(discord.ui.Label(text="Offending Vehicle Type / نوع المركبة", component=self.vehicle_type))
         self.add_item(discord.ui.Label(text="Vehicle Plate Number / رقم اللوحة", component=self.plate))
         self.add_item(discord.ui.Label(text="Recorded Charge / التُهمة المُسجلة", component=self.charge))
@@ -176,14 +180,15 @@ class VehicleImpoundModal(discord.ui.Modal, title="𝗩𝗲𝗵𝗶𝗰𝗹𝗲 
         await interaction.response.defer(ephemeral=True)
 
         character_id = str(self.character_id).strip()
+        suspect_name = str(self.suspect_name).strip()
         vehicle_type = str(self.vehicle_type).strip()
         plate = str(self.plate).strip()
         charge = str(self.charge).strip()
         image_link = str(self.image_link).strip()
         admin_mention = interaction.user.mention
 
-        view = _vehicle_impound_view_v2(admin_mention, character_id, vehicle_type, plate, charge, image_link)
-        summary = f"Vehicle: {vehicle_type} | Plate: {plate} | Charge: {charge}"
+        view = _vehicle_impound_view_v2(admin_mention, character_id, suspect_name, vehicle_type, plate, charge, image_link)
+        summary = f"Suspect: {suspect_name} | Vehicle: {vehicle_type} | Plate: {plate} | Charge: {charge}"
         await _finalize(
             interaction, record_type="vehicle_impound", character_id=character_id, summary=summary,
             view=view, points=config.VEHICLE_IMPOUND_POINTS,
@@ -194,12 +199,14 @@ class SuspectStatementModal(discord.ui.Modal, title="𝗦𝘂𝘀𝗽𝗲𝗰�
     def __init__(self):
         super().__init__()
         self.character_id = discord.ui.TextInput(placeholder="", required=True, max_length=50)
+        self.suspect_name = discord.ui.TextInput(placeholder="", required=True, max_length=100)
         self.case = discord.ui.TextInput(placeholder="", required=True, max_length=300)
         self.justification = discord.ui.TextInput(
             placeholder="", required=True, max_length=1000, style=discord.TextStyle.paragraph,
         )
         self.image_link = discord.ui.TextInput(placeholder="", required=False, max_length=500)
         self.add_item(discord.ui.Label(text="Id Character / رقم هوية الشخص", component=self.character_id))
+        self.add_item(discord.ui.Label(text="Suspect Name / اسم المُتهم", component=self.suspect_name))
         self.add_item(discord.ui.Label(text="Defendant’s Case / قضية المُتهم", component=self.case))
         self.add_item(discord.ui.Label(text="Defendant’s Justifications / اقوال المُتهم", component=self.justification))
         self.add_item(discord.ui.Label(text="Image Link / رابط صورة لوجه المُتهم", component=self.image_link))
@@ -211,13 +218,14 @@ class SuspectStatementModal(discord.ui.Modal, title="𝗦𝘂𝘀𝗽𝗲𝗰�
         await interaction.response.defer(ephemeral=True)
 
         character_id = str(self.character_id).strip()
+        suspect_name = str(self.suspect_name).strip()
         case = str(self.case).strip()
         justification = str(self.justification).strip()
         image_link = str(self.image_link).strip()
         admin_mention = interaction.user.mention
 
-        view = _suspect_statement_view_v2(admin_mention, character_id, case, justification, image_link)
-        summary = f"Case: {case} | Justification: {justification[:200]}"
+        view = _suspect_statement_view_v2(admin_mention, character_id, suspect_name, case, justification, image_link)
+        summary = f"Suspect: {suspect_name} | Case: {case} | Justification: {justification[:200]}"
         await _finalize(
             interaction, record_type="suspect_statement", character_id=character_id, summary=summary,
             view=view, points=config.SUSPECT_STATEMENT_POINTS,
