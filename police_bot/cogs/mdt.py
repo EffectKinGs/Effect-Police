@@ -48,6 +48,7 @@ def _mdt_embed(admin_mention, character_id, charge, duration, fine, image_link):
         embed.set_image(url=image_link)
     return embed
 
+
 def _vehicle_impound_embed(character_id: str, vehicle_type: str, plate: str, charge: str, image_link: str) -> discord.Embed:
     description = (
         f"**1 - <:ETRP_145:1542162076255002624>  '  Id Character : {character_id} **\n"
@@ -74,7 +75,8 @@ def _suspect_statement_embed(character_id: str, case: str, justification: str, i
 
 
 async def _finalize(
-    interaction: discord.Interaction, *, record_type: str, character_id: str, summary: str, embed: discord.Embed, points: int,
+    interaction: discord.Interaction, *, record_type: str, character_id: str, summary: str,
+    embed: discord.Embed, points: int, ping_user: discord.Member | None = None,
 ):
     channel = await _get_target_channel(interaction.guild, record_type)
     if channel is None:
@@ -86,7 +88,11 @@ async def _finalize(
         return
 
     try:
-        await channel.send(embed=embed)
+        await channel.send(
+            content=ping_user.mention if ping_user else None,
+            embed=embed,
+            allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False),
+        )
     except (discord.Forbidden, discord.HTTPException):
         await interaction.followup.send("⚠️ تعذر الإرسال لقناة الاستقبال، تأكد من صلاحيات البوت فيها.", ephemeral=True)
         return
@@ -126,11 +132,13 @@ class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
         fine = str(self.fine).strip()
         image_link = str(self.image_link).strip()
 
+        admin_mention = interaction.user.mention  # ← المنشن الرسمي للشخص اللي نزّل الأمر
+
         embed = _mdt_embed(admin_mention, character_id, charge, duration, fine, image_link)
         summary = f"Charge: {charge} | Sentence: {duration} | Fine: {fine}"
         await _finalize(
             interaction, record_type="mdt", character_id=character_id, summary=summary,
-            embed=embed, points=config.MDT_POINTS,
+            embed=embed, points=config.MDT_POINTS, ping_user=interaction.user,
         )
 
 
