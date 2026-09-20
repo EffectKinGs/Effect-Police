@@ -37,10 +37,11 @@ async def _get_target_channel(guild: discord.Guild, record_type: str) -> discord
 
 def _mdt_embed(character_id: str, charge: str, duration: str, fine: str, image_link: str) -> discord.Embed:
     description = (
-        f"**1 - <:ETRP_145:1542162076255002624>  '  Id Character : {character_id} **\n"
-        f"**2 - <:ETRP_108:1500486542031065253>  '  Person’s Charge : {charge} **\n"
-        f"**3 - <:ETRP_75:1500185654015823924>  '  Sentence Duration : {duration} **\n"
-        f"** 4 -<:ETRP_139:1542161823128756335>  '  Financial Fine : {fine} **"
+        f"**1 - <:emoji_38:1550334422274801664>︲Mention the official : {admin_mention} **"
+        f"**2 - <:emoji_13:1550308496216432781>︲Id Character : {character_id} **"
+        f"**3 - <:emoji_14:1550308740551417956>︲Person’s Charge : {charge} **"
+        f"**4 - <:emoji_31:1550311895594963094>︲Sentence Duration : {duration} **"
+        f"**5 - <:emoji_14:1550308636214169610>︲Financial Fine : {fine} **"    
     )
     embed = utils.base_embed("MDT", description, image_url="")
     if image_link:
