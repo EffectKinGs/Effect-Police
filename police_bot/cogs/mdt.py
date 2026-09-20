@@ -79,10 +79,10 @@ def _suspect_statement_view_v2(admin_mention: str, character_id: str, case: str,
     ))
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
-        f"**1 - <:emoji_38:1550334422274801664>︲ Mention the official : ** {admin_mention}\n"
-        f"**2 - <:emoji_13:1550308496216432781>︲ Id Character : ** {character_id}\n"
-        f"**3 - <:GCRP:1542924036458287135>︲ Defendant’s Case : ** {case}\n"
-        f"**4 - <:ETRP_139:1542161823128756335>︲ Defendant’s Justifications : ** {justification}"
+        f"**1 - <:emoji_38:1550334422274801664>︲Mention the official : ** {admin_mention}\n"
+        f"**2 - <:emoji_13:1550308496216432781>︲Id Character : ** {character_id}\n"
+        f"**3 - <:emoji:1551351828774522952>︲Defendant’s Case : ** {case}\n"
+        f"**4 - <:ETRP_139:1542161823128756335>︲Defendant’s Justifications : ** {justification}"
     ))
     if image_link:
         container.add_item(discord.ui.MediaGallery(
