@@ -31,8 +31,7 @@ def _mdt_view_v2(admin_mention: str, character_id: str, charge: str, duration: s
     view = discord.ui.LayoutView(timeout=None)
     container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
     header = discord.ui.TextDisplay(
-        f"# <:emoji_45:1550961724331397231> ︲ MDT Record\n"
-        f"**Mention the official :** {admin_mention}"
+        "# <:emoji_45:1550961724331397231> ︲ MDT Record"
     )
     if image_link:
         section = discord.ui.Section(header, accessory=discord.ui.Thumbnail(media=image_link))
@@ -41,10 +40,11 @@ def _mdt_view_v2(admin_mention: str, character_id: str, charge: str, duration: s
         container.add_item(header)
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
-        f"**1 - <:emoji_13:1550308496216432781>︲ Id Character : ** {character_id}\n"
-        f"**2 - <:emoji_14:1550308740551417956>︲ Person’s Charge : ** {charge}\n"
-        f"**3 - <:emoji_31:1550311895594963094>︲ Sentence Duration : ** {duration}\n"
-        f"**4 - <:emoji_14:1550308636214169610>︲ Financial Fine : ** {fine}"
+        f"**1 - <:emoji_38:1550334422274801664>︲ Mention the official : ** {admin_mention}\n"
+        f"**2 - <:emoji_13:1550308496216432781>︲ Id Character : ** {character_id}\n"
+        f"**3 - <:emoji_14:1550308740551417956>︲ Person’s Charge : ** {charge}\n"
+        f"**4 - <:emoji_31:1550311895594963094>︲ Sentence Duration : ** {duration}\n"
+        f"**5 - <:emoji_14:1550308636214169610>︲ Financial Fine : ** {fine}"
     ))
     view.add_item(container)
     return view
@@ -54,8 +54,7 @@ def _vehicle_impound_view_v2(admin_mention: str, character_id: str, vehicle_type
     view = discord.ui.LayoutView(timeout=None)
     container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
     header = discord.ui.TextDisplay(
-        f"# <:emoji_45:1550961724331397231> ︲ Vehicle Impound\n"
-        f"**Mention the official :** {admin_mention}"
+        "# <:emoji_45:1550961724331397231> ︲ Vehicle Impound"
     )
     if image_link:
         section = discord.ui.Section(header, accessory=discord.ui.Thumbnail(media=image_link))
@@ -64,10 +63,11 @@ def _vehicle_impound_view_v2(admin_mention: str, character_id: str, vehicle_type
         container.add_item(header)
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
-        f"**1 - <:emoji_13:1550308496216432781>︲ Id Character : ** {character_id}\n"
-        f"**2 - <:emoji_131:1551326444565831813>︲ Offending Vehicle Type : ** {vehicle_type}\n"
-        f"**3 - <:emoji_39:1550337741936394380>︲ Vehicle Plate Number : ** {plate}\n"
-        f"**4 - <:FaLcoN:1551327269493153887>︲ Recorded Charge : ** {charge}"
+        f"**1 - <:emoji_38:1550334422274801664>︲ Mention the official : ** {admin_mention}\n"
+        f"**2 - <:emoji_13:1550308496216432781>︲ Id Character : ** {character_id}\n"
+        f"**3 - <:emoji_131:1551326444565831813>︲ Offending Vehicle Type : ** {vehicle_type}\n"
+        f"**4 - <:emoji_39:1550337741936394380>︲ Vehicle Plate Number : ** {plate}\n"
+        f"**5 - <:FaLcoN:1551327269493153887>︲ Recorded Charge : ** {charge}"
     ))
     view.add_item(container)
     return view
@@ -77,8 +77,7 @@ def _suspect_statement_view_v2(admin_mention: str, character_id: str, case: str,
     view = discord.ui.LayoutView(timeout=None)
     container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
     header = discord.ui.TextDisplay(
-        f"# <:emoji_45:1550961724331397231> ︲ Suspect Statement\n"
-        f"**Mention the official :** {admin_mention}"
+        "# <:emoji_45:1550961724331397231> ︲ Suspect Statement"
     )
     if image_link:
         section = discord.ui.Section(header, accessory=discord.ui.Thumbnail(media=image_link))
@@ -87,9 +86,10 @@ def _suspect_statement_view_v2(admin_mention: str, character_id: str, case: str,
         container.add_item(header)
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
-        f"**1 - <:emoji_13:1550308496216432781>︲ Id Character : ** {character_id}\n"
-        f"**2 - <:GCRP:1542924036458287135>︲ Defendant’s Case : ** {case}\n"
-        f"**3 - <:ETRP_139:1542161823128756335>︲ Defendant’s Justifications : ** {justification}"
+        f"**1 - <:emoji_38:1550334422274801664>︲ Mention the official : ** {admin_mention}\n"
+        f"**2 - <:emoji_13:1550308496216432781>︲ Id Character : ** {character_id}\n"
+        f"**3 - <:GCRP:1542924036458287135>︲ Defendant’s Case : ** {case}\n"
+        f"**4 - <:ETRP_139:1542161823128756335>︲ Defendant’s Justifications : ** {justification}"
     ))
     view.add_item(container)
     return view
