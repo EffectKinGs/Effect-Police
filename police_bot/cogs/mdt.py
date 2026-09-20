@@ -35,19 +35,18 @@ async def _get_target_channel(guild: discord.Guild, record_type: str) -> discord
     return channel if isinstance(channel, discord.TextChannel) else None
 
 
-def _mdt_embed(character_id: str, charge: str, duration: str, fine: str, image_link: str) -> discord.Embed:
-    description = (
-        f"**1 - <:emoji_38:1550334422274801664>︲Mention the official : {admin_mention} **"
-        f"**2 - <:emoji_13:1550308496216432781>︲Id Character : {character_id} **"
-        f"**3 - <:emoji_14:1550308740551417956>︲Person’s Charge : {charge} **"
-        f"**4 - <:emoji_31:1550311895594963094>︲Sentence Duration : {duration} **"
-        f"**5 - <:emoji_14:1550308636214169610>︲Financial Fine : {fine} **"    
+def _mdt_embed(admin_mention, character_id, charge, duration, fine, image_link):
+    embed = discord.Embed()
+    embed.description = (
+        f"**1 - <:emoji_38:1550334422274801664>︲Mention the official : {admin_mention} **\n"
+        f"**2 - <:emoji_13:1550308496216432781>︲ Id Character : {character_id} **\n"
+        f"**3 - <:emoji_14:1550308740551417956>︲Person’s Charge : {charge} **\n"
+        f"**4 - <:emoji_31:1550311895594963094>︲Sentence Duration : {duration} **\n"
+        f"**5 - <:emoji_14:1550308636214169610> ︲Financial Fine : {fine} **"
     )
-    embed = utils.base_embed("MDT", description, image_url="")
     if image_link:
         embed.set_image(url=image_link)
     return embed
-
 
 def _vehicle_impound_embed(character_id: str, vehicle_type: str, plate: str, charge: str, image_link: str) -> discord.Embed:
     description = (
@@ -127,7 +126,7 @@ class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
         fine = str(self.fine).strip()
         image_link = str(self.image_link).strip()
 
-        embed = _mdt_embed(character_id, charge, duration, fine, image_link)
+        embed = _mdt_embed(admin_mention, character_id, charge, duration, fine, image_link)
         summary = f"Charge: {charge} | Sentence: {duration} | Fine: {fine}"
         await _finalize(
             interaction, record_type="mdt", character_id=character_id, summary=summary,
