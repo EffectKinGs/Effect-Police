@@ -30,14 +30,9 @@ async def _get_target_channel(guild: discord.Guild, record_type: str) -> discord
 def _mdt_view_v2(admin_mention: str, character_id: str, charge: str, duration: str, fine: str, image_link: str) -> discord.ui.LayoutView:
     view = discord.ui.LayoutView(timeout=None)
     container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
-    header = discord.ui.TextDisplay(
+    container.add_item(discord.ui.TextDisplay(
         "# <:emoji_45:1550961724331397231> ︲ MDT Record"
-    )
-    if image_link:
-        section = discord.ui.Section(header, accessory=discord.ui.Thumbnail(media=image_link))
-        container.add_item(section)
-    else:
-        container.add_item(header)
+    ))
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
         f"**1 - <:emoji_38:1550334422274801664>︲ Mention the official : ** {admin_mention}\n"
@@ -46,6 +41,10 @@ def _mdt_view_v2(admin_mention: str, character_id: str, charge: str, duration: s
         f"**4 - <:emoji_31:1550311895594963094>︲ Sentence Duration : ** {duration}\n"
         f"**5 - <:emoji_14:1550308636214169610>︲ Financial Fine : ** {fine}"
     ))
+    if image_link:
+        container.add_item(discord.ui.MediaGallery(
+            discord.MediaGalleryItem(media=image_link)
+        ))
     view.add_item(container)
     return view
 
@@ -53,14 +52,9 @@ def _mdt_view_v2(admin_mention: str, character_id: str, charge: str, duration: s
 def _vehicle_impound_view_v2(admin_mention: str, character_id: str, vehicle_type: str, plate: str, charge: str, image_link: str) -> discord.ui.LayoutView:
     view = discord.ui.LayoutView(timeout=None)
     container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
-    header = discord.ui.TextDisplay(
+    container.add_item(discord.ui.TextDisplay(
         "# <:emoji_45:1550961724331397231> ︲ Vehicle Impound"
-    )
-    if image_link:
-        section = discord.ui.Section(header, accessory=discord.ui.Thumbnail(media=image_link))
-        container.add_item(section)
-    else:
-        container.add_item(header)
+    ))
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
         f"**1 - <:emoji_38:1550334422274801664>︲ Mention the official : ** {admin_mention}\n"
@@ -69,6 +63,10 @@ def _vehicle_impound_view_v2(admin_mention: str, character_id: str, vehicle_type
         f"**4 - <:emoji_39:1550337741936394380>︲ Vehicle Plate Number : ** {plate}\n"
         f"**5 - <:FaLcoN:1551327269493153887>︲ Recorded Charge : ** {charge}"
     ))
+    if image_link:
+        container.add_item(discord.ui.MediaGallery(
+            discord.MediaGalleryItem(media=image_link)
+        ))
     view.add_item(container)
     return view
 
@@ -76,14 +74,9 @@ def _vehicle_impound_view_v2(admin_mention: str, character_id: str, vehicle_type
 def _suspect_statement_view_v2(admin_mention: str, character_id: str, case: str, justification: str, image_link: str) -> discord.ui.LayoutView:
     view = discord.ui.LayoutView(timeout=None)
     container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
-    header = discord.ui.TextDisplay(
+    container.add_item(discord.ui.TextDisplay(
         "# <:emoji_45:1550961724331397231> ︲ Suspect Statement"
-    )
-    if image_link:
-        section = discord.ui.Section(header, accessory=discord.ui.Thumbnail(media=image_link))
-        container.add_item(section)
-    else:
-        container.add_item(header)
+    ))
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
         f"**1 - <:emoji_38:1550334422274801664>︲ Mention the official : ** {admin_mention}\n"
@@ -91,6 +84,10 @@ def _suspect_statement_view_v2(admin_mention: str, character_id: str, case: str,
         f"**3 - <:GCRP:1542924036458287135>︲ Defendant’s Case : ** {case}\n"
         f"**4 - <:ETRP_139:1542161823128756335>︲ Defendant’s Justifications : ** {justification}"
     ))
+    if image_link:
+        container.add_item(discord.ui.MediaGallery(
+            discord.MediaGalleryItem(media=image_link)
+        ))
     view.add_item(container)
     return view
 
