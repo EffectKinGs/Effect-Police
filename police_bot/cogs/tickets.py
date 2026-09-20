@@ -75,6 +75,7 @@ async def create_ticket_channel(
         f"🎫 تذكرة جديدة: {type_label}",
         "اشرح طلبك بالتفصيل، وسيتم الرد عليك من فريق الدعم. "
         "صاحب التذكرة لا يستطيع استلامها أو إغلاقها.",
+        image_url="",
     )
 
     embed.description = (
