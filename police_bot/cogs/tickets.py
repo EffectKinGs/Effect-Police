@@ -9,37 +9,89 @@ import database as db
 import utils
 
 
-async def create_ticket_channel(interaction: discord.Interaction, type_label: str, role_id: int):
+async def create_ticket_channel(
+    interaction: discord.Interaction,
+    type_label: str,
+    role_id: int,
+):
     guild = interaction.guild
     support_role = guild.get_role(role_id)
+
     overwrites = {
-        guild.default_role: discord.PermissionOverwrite(view_channel=False),
-        interaction.user: discord.PermissionOverwrite(view_channel=True, send_messages=True),
-        guild.me: discord.PermissionOverwrite(view_channel=True, send_messages=True),
+        guild.default_role: discord.PermissionOverwrite(
+            view_channel=False
+        ),
+        interaction.user: discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+        ),
+        guild.me: discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+        ),
     }
+
     if support_role:
-        overwrites[support_role] = discord.PermissionOverwrite(view_channel=True, send_messages=True)
-    safe_name = "".join(c for c in interaction.user.display_name if c.isalnum()) or "ticket"
-    channel = await guild.create_text_channel(name=f"ticket-{safe_name}", overwrites=overwrites, category=interaction.channel.category)
-    await db.create_ticket(channel.id, interaction.user.id, type_label)
-    await db.set_setting(f"ticket_support_role:{channel.id}", str(role_id or 0))
-    await utils.send_log(guild, "Ticket Created", f"المنفذ: {interaction.user.mention}\nالنوع: {type_label}\nالقناة: {channel.mention}")
-    embed = utils.base_embed(f"🎫 تذكرة جديدة: {type_label}", "اشرح طلبك بالتفصيل، وسيتم الرد عليك من فريق الدعم. صاحب التذكرة لا يستطيع استلامها أو إغلاقها.")
+        overwrites[support_role] = discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+        )
+
+    safe_name = (
+        "".join(
+            c for c in interaction.user.display_name
+            if c.isalnum()
+        )
+        or "ticket"
+    )
+
+    channel = await guild.create_text_channel(
+        name=f"ticket-{safe_name}",
+        overwrites=overwrites,
+        category=interaction.channel.category,
+    )
+
+    await db.create_ticket(
+        channel.id,
+        interaction.user.id,
+        type_label,
+    )
+
+    await db.set_setting(
+        f"ticket_support_role:{channel.id}",
+        str(role_id or 0),
+    )
+
+    await utils.send_log(
+        guild,
+        "Ticket Created",
+        f"المنفذ: {interaction.user.mention}\n"
+        f"النوع: {type_label}\n"
+        f"القناة: {channel.mention}",
+    )
+
+    embed = utils.base_embed(
+        f"🎫 تذكرة جديدة: {type_label}",
+        "اشرح طلبك بالتفصيل، وسيتم الرد عليك من فريق الدعم. "
+        "صاحب التذكرة لا يستطيع استلامها أو إغلاقها.",
+    )
+
     embed.description = (
-    f"{interaction.user.mention} "
-    f"{support_role.mention if support_role else ''}\n\n"
-    f"{embed.description}"
-)
-await channel.send(
-    view=utils.components_v2_view(
-        embed,
-        TicketActionsView(),
-    ),
-    allowed_mentions=discord.AllowedMentions(
-        users=True,
-        roles=True,
-    ),
-)
+        f"{interaction.user.mention} "
+        f"{support_role.mention if support_role else ''}\n\n"
+        f"{embed.description}"
+    )
+
+    await channel.send(
+        view=utils.components_v2_view(
+            embed,
+            TicketActionsView(),
+        ),
+        allowed_mentions=discord.AllowedMentions(
+            users=True,
+            roles=True,
+        ),
+    )
 
     return channel
 
