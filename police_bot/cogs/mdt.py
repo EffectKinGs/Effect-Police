@@ -76,7 +76,7 @@ def _suspect_statement_embed(character_id: str, case: str, justification: str, i
 
 async def _finalize(
     interaction: discord.Interaction, *, record_type: str, character_id: str, summary: str,
-    embed: discord.Embed, points: int, ping_user: discord.Member | None = None,
+    embed: discord.Embed, points: int,
 ):
     channel = await _get_target_channel(interaction.guild, record_type)
     if channel is None:
@@ -89,7 +89,6 @@ async def _finalize(
 
     try:
         await channel.send(
-            content=ping_user.mention if ping_user else None,
             embed=embed,
             allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False),
         )
@@ -138,7 +137,7 @@ class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
         summary = f"Charge: {charge} | Sentence: {duration} | Fine: {fine}"
         await _finalize(
             interaction, record_type="mdt", character_id=character_id, summary=summary,
-            embed=embed, points=config.MDT_POINTS, ping_user=interaction.user,
+            embed=embed, points=config.MDT_POINTS,
         )
 
 
