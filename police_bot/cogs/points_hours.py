@@ -13,12 +13,16 @@ async def _check_point_embed(member: discord.Member) -> discord.Embed:
     points, hours = await db.get_points_hours(member.id)
     session_total = await db.total_duration_seconds(member.id, member.guild.id)
     total = session_total + int(hours * 3600)
-    description = (
-        f"-# ** <:emoji_36:1550311975643254955>︲OFficer : {member.mention}**\n"
-        f"-# ** <:emoji_12:1550308402520133632>︲Your PoinTs : ( {points} )**\n"
-        f"-# ** <:emoji_10:1550308354759327835>︲Your Field Commencement Time : ( {utils.format_duration(total)} )**"
+    lines = [
+        f"-# ** <:emoji_36:1550311975643254955>︲OFficer : {member.mention}**",
+        f"-# ** <:emoji_12:1550308402520133632>︲Your PoinTs : ( {points} )**",
+        f"-# ** <:emoji_10:1550308354759327835>︲Your Field Commencement Time : ( {utils.format_duration(total)} )**",
+    ]
+    return utils.base_embed(
+        "# <:emoji_5:1550307911115218974>︲PoinTs RepoRt .",
+        "\n".join(lines),
+        panel_key="points",
     )
-    return utils.base_embed("# <:emoji_5:1550307911115218974>︲PoinTs RepoRt .", description, panel_key="points")
 
 
 async def _top10_embed(guild: discord.Guild) -> discord.Embed:
@@ -32,12 +36,19 @@ async def _top10_embed(guild: discord.Guild) -> discord.Embed:
             mention = member.mention if member else f"<@{user_id}>"
             session_total = await db.total_duration_seconds(user_id, guild.id)
             total_seconds = session_total + int(hours * 3600)
-            blocks.append(
-                f"-# **<:emoji_38:1550334422274801664> ︲Mention The Officer : {mention}**\n"
-                f"-# <:emoji_36:1550311975643254955> ︲Officer Points : **{points}**\n"
-                f"-# <:emoji_36:1550311975643254955> ︲Officer Working Hours : **{utils.format_duration(total_seconds)}**"
+            block = "\n".join(
+                [
+                    f"-# **<:emoji_38:1550334422274801664> ︲Mention The Officer : {mention}**",
+                    f"-# <:emoji_36:1550311975643254955> ︲Officer Points : **{points}**",
+                    f"-# <:emoji_36:1550311975643254955> ︲Officer Working Hours : **{utils.format_duration(total_seconds)}**",
+                ]
             )
-    return utils.base_embed("Top 10", "\n\n".join(blocks).strip(), panel_key="points")
+            blocks.append(block)
+    return utils.base_embed(
+        "Top 10",
+        "\n\n".join(blocks).strip(),
+        panel_key="points",
+    )
 
 
 class PointsPanelView(discord.ui.View):
@@ -70,12 +81,15 @@ class PointsHours(commands.Cog):
         amount = abs(amount)
         await db.add_points(member.id, amount)
         await utils.send_log(ctx.guild, "Add Point", f"Officer: {member.mention}\nPoint: {amount}\nResponsible Officer: {ctx.author.mention}")
+        lines = [
+            f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
+            f"-# **<:emoji_24:1550309675155591249>︲Added Points :  ( {amount} )**",
+            f"-# **<:emoji_25:1550309714330390538>︲Points Addition Officer :  {ctx.author.mention} **",
+        ]
         await ctx.send(
             embed=utils.base_embed(
                 "**<:emoji_187:1551676553413394552>︲Add PoinT .**",
-                f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**\n"
-                f"-# **<:emoji_24:1550309675155591249>︲Added Points :  ( {amount} )**\ `n"
-                f"-# **1<:emoji_25:1550309714330390538>︲Points Addition Officer :  {ctx.author.mention} **",
+                "\n".join(lines),
             )
         )
 
@@ -86,12 +100,15 @@ class PointsHours(commands.Cog):
         amount = abs(amount)
         await db.add_points(member.id, -amount)
         await utils.send_log(ctx.guild, "Remove Point", f"Officer: {member.mention}\nPoint: {amount}\nResponsible Officer: {ctx.author.mention}")
+        lines = [
+            f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
+            f"-# **<:emoji_24:1550309675155591249>︲Removed Points :  ( {amount} )**",
+            f"-# **<:emoji_25:1550309714330390538>︲Points Removal Officer :  {ctx.author.mention} **",
+        ]
         await ctx.send(
             embed=utils.base_embed(
                 "**<:MTRP:1551676689212248215>︲REmove PoinTs .**",
-                f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**\n"
-                f"-# **<:emoji_24:1550309675155591249>︲Removed Points :  ( {amount} )**\n"
-                f"-# **<:emoji_25:1550309714330390538>︲Points Removal Officer :  {ctx.author.mention} **",
+                "\n".join(lines),
             )
         )
 
@@ -102,12 +119,15 @@ class PointsHours(commands.Cog):
         hours = abs(hours)
         await db.add_hours(member.id, hours)
         await utils.send_log(ctx.guild, "Add Hours", f"Officer: {member.mention}\nHours: {hours}\nResponsible Officer: {ctx.author.mention}")
+        lines = [
+            f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
+            f"-# **<:emoji_24:1550309675155591249>︲Added Hours :  ( {utils.format_duration(hours * 3600)} )**",
+            f"-# **<:emoji_25:1550309714330390538>︲Hours Addition Officer :  {ctx.author.mention}**",
+        ]
         await ctx.send(
             embed=utils.base_embed(
                 "**<:emoji_187:1551676553413394552>︲Add HouRs .**",
-                f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**\n"
-                f"-# **<:emoji_24:1550309675155591249>︲Added Hours :  ( {utils.format_duration(hours * 3600)} )**\n"
-                f"-# **<:emoji_25:1550309714330390538>︲Hours Addition Officer :  {ctx.author.mention}**",
+                "\n".join(lines),
             )
         )
 
@@ -118,12 +138,15 @@ class PointsHours(commands.Cog):
         hours = abs(hours)
         await db.add_hours(member.id, -hours)
         await utils.send_log(ctx.guild, "Remove Hours", f"Officer: {member.mention}\nHours: {hours}\nResponsible Officer: {ctx.author.mention}")
+        lines = [
+            f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
+            f"-# **<:emoji_24:1550309675155591249>︲Removed Hours :  ( {utils.format_duration(hours * 3600)} )**",
+            f"-# **<:emoji_25:1550309714330390538>︲Hours Removal Officer :  {ctx.author.mention} **",
+        ]
         await ctx.send(
             embed=utils.base_embed(
                 "**<:MTRP:1551676689212248215>︲REmove HouRs .**",
-                f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**\n"
-                f"-# **<:emoji_24:1550309675155591249>︲Removed Hours :  ( {utils.format_duration(hours * 3600)} )**\n"
-                f"-# **<:emoji_25:1550309714330390538>︲Hours Removal Officer :  {ctx.author.mention} **",
+                "\n".join(lines),
             )
         )
 
@@ -140,9 +163,21 @@ class PointsHours(commands.Cog):
                 member = ctx.guild.get_member(user_id)
                 mention = member.mention if member else f"<@{user_id}>"
                 total = await db.total_duration_seconds(user_id, ctx.guild.id) + int(hours * 3600)
-                blocks.append(f"-# **<:emoji_38:1550334422274801664> ︲Mention The Officer : {mention}**\n-# <:emoji_36:1550311975643254955> ︲Officer Points : **{points}**\n-# <:emoji_36:1550311975643254955> ︲Officer Working Hours : **{utils.format_duration(total)}**")
+                block = "\n".join(
+                    [
+                        f"-# **<:emoji_38:1550334422274801664> ︲Mention The Officer : {mention}**",
+                        f"-# <:emoji_36:1550311975643254955> ︲Officer Points : **{points}**",
+                        f"-# <:emoji_36:1550311975643254955> ︲Officer Working Hours : **{utils.format_duration(total)}**",
+                    ]
+                )
+                blocks.append(block)
             description = "\n\n".join(blocks)
-        embed = utils.base_embed("<:emoji_46:1550990951525122158> ︲ List All The PoinTs .", description, image_url="", panel_key="points")
+        embed = utils.base_embed(
+            "<:emoji_46:1550990951525122158> ︲ List All The PoinTs .",
+            description,
+            image_url="",
+            panel_key="points",
+        )
         await ctx.send(view=utils.components_v2_view(embed))
 
     @app_commands.command(name="points-panel", description="نشر لوحة نقاط العسكريين")
@@ -153,7 +188,12 @@ class PointsHours(commands.Cog):
             return
         await interaction.response.defer(ephemeral=True)
         description = "**<:alert:1551325711699026021> - From Here, You Can View Your Military Points And Check The TOP 10 Military Personnel .**"
-        embed = utils.base_embed("<:emoji_14:1550308636214169610> ︲Officer PoinTs .", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}", panel_key="points")
+        embed = utils.base_embed(
+            "<:emoji_14:1550308636214169610> ︲Officer PoinTs .",
+            description,
+            image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
+            panel_key="points",
+        )
         await utils.send_panel(interaction.channel, embed, PointsPanelView(), config.PANEL_BANNER_ASSET)
         await interaction.delete_original_response()
 
