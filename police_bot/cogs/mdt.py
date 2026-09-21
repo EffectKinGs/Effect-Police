@@ -119,7 +119,7 @@ async def _finalize(
         interaction.guild, f"MDT — {RECORD_TYPE_LABELS[record_type]}",
         f"المُسجِّل: {interaction.user.mention}\nآيدي الشخصية: {character_id}\nالنقاط المُضافة: {points}",
     )
-    await interaction.followup.send(f"✅ تم التسجيل بنجاح، وتمت إضافة {points} نقطة لك.", ephemeral=True)
+    await interaction.followup.send(f"-# **<:ELRP:1551384064613949603> ︲ تم تسجيل السجل بنجاح ، وتمت اضافة {points} نقطة لك .**", ephemeral=True)
 
 
 class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
