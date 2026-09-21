@@ -29,7 +29,7 @@ async def _top10_view(guild: discord.Guild) -> discord.ui.LayoutView:
     rows = await db.top_points_hours(10)
 
     items: list[discord.ui.Item] = [
-        discord.ui.TextDisplay("## Top 10"),
+        discord.ui.TextDisplay("<:emoji_17:1550308884852383805> ︲ToP10 ."),
         discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
     ]
 
@@ -43,9 +43,9 @@ async def _top10_view(guild: discord.Guild) -> discord.ui.LayoutView:
             total_seconds = session_total + int(hours * 3600)
             block = "\n".join(
                 [
-                    f"-# **{index} - <:emoji_38:1550334422274801664> ︲Mention The Officer : {mention}**",
-                    f"-# <:emoji_36:1550311975643254955> ︲Officer Points : **{points}**",
-                    f"-# <:emoji_36:1550311975643254955> ︲Officer Working Hours : **{utils.format_duration(total_seconds)}**",
+                    f"-# **{index} - <:emoji_38:1550334422274801664>︲Mention The Officer : {mention}**",
+                    f"-# <:emoji_36:1550311975643254955>︲Officer Points : **{points}**",
+                    f"-# <:emoji_10:1550308354759327835>︲Officer Working Hours : **{utils.format_duration(total_seconds)}**",
                 ]
             )
             items.append(discord.ui.TextDisplay(block))
@@ -173,9 +173,9 @@ class PointsHours(commands.Cog):
                 total = await db.total_duration_seconds(user_id, ctx.guild.id) + int(hours * 3600)
                 block = "\n".join(
                     [
-                        f"-# **{index} - <:emoji_38:1550334422274801664> ︲Mention The Officer : {mention}**",
-                        f"-# <:emoji_36:1550311975643254955> ︲Officer Points : **{points}**",
-                        f"-# <:emoji_36:1550311975643254955> ︲Officer Working Hours : **{utils.format_duration(total)}**",
+                        f"-# **{index} - <:emoji_38:1550334422274801664>︲Mention The Officer : {mention}**",
+                        f"-# <:emoji_36:1550311975643254955>︲Officer Points : **{points}**",
+                        f"-# <:emoji_10:1550308354759327835>︲Officer Working Hours : **{utils.format_duration(total)}**",
                     ]
                 )
                 blocks.append(block)
