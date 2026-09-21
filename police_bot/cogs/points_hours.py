@@ -9,24 +9,12 @@ import database as db
 import utils
 
 
-def _v2_view(*items: discord.ui.Item, accent: discord.Colour | None = None) -> discord.ui.LayoutView:
+def _v2_view(*items: discord.ui.Item) -> discord.ui.LayoutView:
     """يبني LayoutView مع Container (Embeds V2)"""
-    container = discord.ui.Container(*items, accent_colour=accent) if accent else discord.ui.Container(*items)
+    container = discord.ui.Container(*items)
     view = discord.ui.LayoutView(timeout=None)
     view.add_item(container)
     return view
-
-
-def _v2_view_from_embed(embed: discord.Embed) -> discord.ui.LayoutView:
-    """يحوّل Embed عادي إلى LayoutView V2"""
-    items: list[discord.ui.Item] = []
-    if embed.title:
-        items.append(discord.ui.TextDisplay(f"## {embed.title}"))
-    if embed.description:
-        items.append(discord.ui.TextDisplay(embed.description))
-    if not items:
-        items.append(discord.ui.TextDisplay("\u200b"))
-    return _v2_view(*items)
 
 
 async def _check_point_view(member: discord.Member) -> discord.ui.LayoutView:
@@ -114,7 +102,7 @@ class PointsHours(commands.Cog):
         await utils.send_log(ctx.guild, "Add Point", f"Officer: {member.mention}\nPoint: {amount}\nResponsible Officer: {ctx.author.mention}")
 
         view = _v2_view(
-            discord.ui.TextDisplay("**<:emoji_187:1551676553413394552>︲Add PoinT .**"),
+            discord.ui.TextDisplay("# <:emoji_187:1551676553413394552>︲Add PoinT ."),
             discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
             discord.ui.TextDisplay(
                 "\n".join(
@@ -137,7 +125,7 @@ class PointsHours(commands.Cog):
         await utils.send_log(ctx.guild, "Remove Point", f"Officer: {member.mention}\nPoint: {amount}\nResponsible Officer: {ctx.author.mention}")
 
         view = _v2_view(
-            discord.ui.TextDisplay("**<:MTRP:1551676689212248215>︲REmove PoinTs .**"),
+            discord.ui.TextDisplay("# <:MTRP:1551676689212248215>︲REmove PoinTs ."),
             discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
             discord.ui.TextDisplay(
                 "\n".join(
@@ -160,7 +148,7 @@ class PointsHours(commands.Cog):
         await utils.send_log(ctx.guild, "Add Hours", f"Officer: {member.mention}\nHours: {hours}\nResponsible Officer: {ctx.author.mention}")
 
         view = _v2_view(
-            discord.ui.TextDisplay("**<:emoji_187:1551676553413394552>︲Add HouRs .**"),
+            discord.ui.TextDisplay("# <:emoji_187:1551676553413394552>︲Add HouRs ."),
             discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
             discord.ui.TextDisplay(
                 "\n".join(
@@ -183,7 +171,7 @@ class PointsHours(commands.Cog):
         await utils.send_log(ctx.guild, "Remove Hours", f"Officer: {member.mention}\nHours: {hours}\nResponsible Officer: {ctx.author.mention}")
 
         view = _v2_view(
-            discord.ui.TextDisplay("**<:MTRP:1551676689212248215>︲REmove HouRs .**"),
+            discord.ui.TextDisplay("# <:MTRP:1551676689212248215>︲REmove HouRs ."),
             discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
             discord.ui.TextDisplay(
                 "\n".join(
