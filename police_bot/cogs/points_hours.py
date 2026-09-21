@@ -14,11 +14,11 @@ async def _check_point_embed(member: discord.Member) -> discord.Embed:
     session_total = await db.total_duration_seconds(member.id, member.guild.id)
     total = session_total + int(hours * 3600)
     description = (
-        f"** <:emoji_143:1542635684286963732> - Officer : {member.mention}\n"
-        f"<:ETRP_28:1499883636110135476> - Your Points : ( {points} )\n"
-        f"<:ETRP_75:1500185654015823924> - Your Field Commencement Time : ( {utils.format_duration(total)} )**"
+        f"-# ** <:emoji_36:1550311975643254955>︲OFficer : {member.mention}**\n"
+        f"-# ** <:emoji_12:1550308402520133632>︲Your PoinTs : ( {points} )**\n"
+        f"-# ** <:emoji_10:1550308354759327835>︲Your Field Commencement Time : ( {utils.format_duration(total)} )**"
     )
-    return utils.base_embed("Points Report", description, panel_key="points")
+    return utils.base_embed("# <:emoji_5:1550307911115218974> ︲PoinTs RepoRt .", description, panel_key="points")
 
 
 async def _top10_embed(guild: discord.Guild) -> discord.Embed:
@@ -75,10 +75,10 @@ class PointsHours(commands.Cog):
         await utils.send_log(ctx.guild, "Add Point", f"Officer: {member.mention}\nPoint: {amount}\nResponsible Officer: {ctx.author.mention}")
         await ctx.send(
             embed=utils.base_embed(
-                "Add Point",
-                f"**<:emoji_143:1542635684286963732> - Officer : {member.mention}\n"
-                f"<:ETRP_28:1499883636110135476> - Point : ( {amount} )\n"
-                f"<:ETRP_145:1542162076255002624> - The Responsible Military Officer : {ctx.author.mention} **",
+                "# <:emoji_187:1551676553413394552>︲Add PoinT .",
+                f"-# **<:emoji_12:1550308402520133632>︲OFficer : {member.mention}**\n"
+                f"-# **<:emoji_24:1550309675155591249>︲Added Points : ( {amount} )**\n"
+                f"-# ** <:emoji_25:1550309714330390538>︲Points Addition Officer : {ctx.author.mention} **",
             )
         )
 
