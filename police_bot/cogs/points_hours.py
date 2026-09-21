@@ -137,7 +137,7 @@ class PointsHours(commands.Cog):
             return
         rows = await db.top_points_hours(1000)
         if not rows:
-            description = "لا توجد بيانات مسجلة حتى الآن."
+            description = "**لا توجد بيانات مسجلة حتى الآن.**"
         else:
             blocks = []
             for user_id, points, hours in rows:
@@ -156,8 +156,8 @@ class PointsHours(commands.Cog):
             await interaction.response.send_message("❌ ما تملك صلاحية استخدام هذا الأمر.", ephemeral=True)
             return
         await interaction.response.defer(ephemeral=True)
-        description = "**<:ETRP_97:1500190884442931271> - From Here, You Can View Your Military Points And Check The TOP 10 Military Personnel .**"
-        embed = utils.base_embed("Officer Points", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}", panel_key="points")
+        description = "**<:alert:1551325711699026021> - From Here, You Can View Your Military Points And Check The TOP 10 Military Personnel .**"
+        embed = utils.base_embed("<:emoji_14:1550308636214169610> ︲Officer PoinTs .", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}", panel_key="points")
         await utils.send_panel(interaction.channel, embed, PointsPanelView(), config.PANEL_BANNER_ASSET)
         await interaction.delete_original_response()
 
