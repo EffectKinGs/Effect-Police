@@ -96,7 +96,7 @@ class PointsHours(commands.Cog):
     @commands.command(name="add-point", aliases=["add-Point"])
     async def add_point_text(self, ctx: commands.Context, member: discord.Member, amount: int):
         if not isinstance(ctx.guild, discord.Guild) or not isinstance(ctx.author, discord.Member) or not utils.has_any_role(ctx.author, config.POINTS_MANAGE_ROLE_IDS):
-            return await ctx.send("-# **<:ETRP_68:1500142625712242818> لاتمتلك الصلاحية ل اضافة النقاط **", delete_after=8)
+            return await ctx.send("-# **<a:MTRP:1550940537492865124> - لاتمتلك الصلاحية ل اضافة النقاط **", delete_after=8)
         amount = abs(amount)
         await db.add_points(member.id, amount)
         await utils.send_log(ctx.guild, "Add Point", f"Officer: {member.mention}\nPoint: {amount}\nResponsible Officer: {ctx.author.mention}")
@@ -119,7 +119,7 @@ class PointsHours(commands.Cog):
     @commands.command(name="remove-point", aliases=["remove-Point"])
     async def remove_point_text(self, ctx: commands.Context, member: discord.Member, amount: int):
         if not isinstance(ctx.guild, discord.Guild) or not isinstance(ctx.author, discord.Member) or not utils.has_any_role(ctx.author, config.POINTS_MANAGE_ROLE_IDS):
-            return await ctx.send("-# **<:ETRP_68:1500142625712242818> لاتمتلك الصلاحية ل ازالة النقاط **", delete_after=8)
+            return await ctx.send("-# **<a:MTRP:1550940537492865124> - لاتمتلك الصلاحية ل ازالة النقاط **", delete_after=8)
         amount = abs(amount)
         await db.add_points(member.id, -amount)
         await utils.send_log(ctx.guild, "Remove Point", f"Officer: {member.mention}\nPoint: {amount}\nResponsible Officer: {ctx.author.mention}")
@@ -142,7 +142,7 @@ class PointsHours(commands.Cog):
     @commands.command(name="add-hours", aliases=["add-Hours"])
     async def add_hours_text(self, ctx: commands.Context, member: discord.Member, hours: float):
         if not isinstance(ctx.guild, discord.Guild) or not isinstance(ctx.author, discord.Member) or not utils.has_any_role(ctx.author, config.POINTS_MANAGE_ROLE_IDS):
-            return await ctx.send("-# **<:ETRP_68:1500142625712242818> لاتمتلك الصلاحية ل اضافة ساعات العمل **", delete_after=8)
+            return await ctx.send("-# **<a:MTRP:1550940537492865124> - لاتمتلك الصلاحية ل اضافة ساعات العمل **", delete_after=8)
         hours = abs(hours)
         await db.add_hours(member.id, hours)
         await utils.send_log(ctx.guild, "Add Hours", f"Officer: {member.mention}\nHours: {hours}\nResponsible Officer: {ctx.author.mention}")
@@ -165,7 +165,7 @@ class PointsHours(commands.Cog):
     @commands.command(name="remove-hours", aliases=["remove-Hours"])
     async def remove_hours_text(self, ctx: commands.Context, member: discord.Member, hours: float):
         if not isinstance(ctx.guild, discord.Guild) or not isinstance(ctx.author, discord.Member) or not utils.has_any_role(ctx.author, config.POINTS_MANAGE_ROLE_IDS):
-            return await ctx.send("-# **<:ETRP_68:1500142625712242818> لاتمتلك الصلاحية ل ازالة ساعات العمل **", delete_after=8)
+            return await ctx.send("-# **<a:MTRP:1550940537492865124> - لاتمتلك الصلاحية ل ازالة ساعات العمل **", delete_after=8)
         hours = abs(hours)
         await db.add_hours(member.id, -hours)
         await utils.send_log(ctx.guild, "Remove Hours", f"Officer: {member.mention}\nHours: {hours}\nResponsible Officer: {ctx.author.mention}")
