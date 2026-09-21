@@ -34,7 +34,7 @@ async def _top10_view(guild: discord.Guild) -> discord.ui.LayoutView:
     ]
 
     if not rows:
-        items.append(discord.ui.TextDisplay("**لا توجد بيانات مسجلة حتى الآن.**"))
+        items.append(discord.ui.TextDisplay("-# ** <a:MTRP:1550940537492865124>  -  لاتوجد بينات مُسجله حتى الان . **"))
     else:
         for index, (user_id, points, hours) in enumerate(rows, start=1):
             member = guild.get_member(user_id)
