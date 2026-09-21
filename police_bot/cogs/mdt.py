@@ -432,9 +432,9 @@ class MDT(commands.Cog):
 
         await interaction.response.defer(ephemeral=True)
         description = (
-            "** <:ETRP_157:1542608532778647643>  '  From Here, You Can View And Remove The Person’s Recorded Violations And Criminal Records . **"
+            "**<a:STRP:1550940475819687970> From Here, You Can View And Remove The Person’s Recorded Violations And Criminal Records . **"
         )
-        embed = utils.base_embed("Record Check", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
+        embed = utils.base_embed("<:MTRP:1551676689212248215>︲Record Check", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
         await utils.send_panel(interaction.channel, embed, RecordCheckPanelView(), config.PANEL_BANNER_ASSET)
         await utils.send_log(
             interaction.guild, "Record Check Panel",
