@@ -23,24 +23,21 @@ async def _check_point_embed(member: discord.Member) -> discord.Embed:
 
 async def _top10_embed(guild: discord.Guild) -> discord.Embed:
     rows = await db.top_points_hours(10)
-    lines: list[str] = []
+    blocks: list[str] = []
     if not rows:
-        lines.append("لا توجد بيانات مسجلة حتى الآن.")
+        blocks.append("**لا توجد بيانات مسجلة حتى الآن.**")
     else:
-        for index, (user_id, points, hours) in enumerate(rows, start=1):
+        for user_id, points, hours in rows:
             member = guild.get_member(user_id)
-            name = member.mention if member else f"<@{user_id}>"
+            mention = member.mention if member else f"<@{user_id}>"
             session_total = await db.total_duration_seconds(user_id, guild.id)
             total_seconds = session_total + int(hours * 3600)
-            lines.extend(
-                [
-                    f"{index} - <:emoji_143:1542635684286963732> - Officer : {name}",
-                    f"Point : ( {points} )",
-                    f"Hours : ( {utils.format_duration(total_seconds)} )",
-                    "",
-                ]
+            blocks.append(
+                f"-# **<:emoji_38:1550334422274801664> ︲Mention The Officer : {mention}**\n"
+                f"-# <:emoji_36:1550311975643254955> ︲Officer Points : **{points}**\n"
+                f"-# <:emoji_36:1550311975643254955> ︲Officer Working Hours : **{utils.format_duration(total_seconds)}**"
             )
-    return utils.base_embed("Top 10", "\n".join(lines).strip(), panel_key="points")
+    return utils.base_embed("Top 10", "\n\n".join(blocks).strip(), panel_key="points")
 
 
 class PointsPanelView(discord.ui.View):
@@ -77,8 +74,8 @@ class PointsHours(commands.Cog):
             embed=utils.base_embed(
                 "**<:emoji_187:1551676553413394552>︲Add PoinT .**",
                 f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**\n"
-                f"-# **<:emoji_24:1550309675155591249>︲Added Points :  ( {amount} )**\n"
-                f"-# **<:emoji_25:1550309714330390538>︲Points Addition Officer :  {ctx.author.mention} **",
+                f"-# **<:emoji_24:1550309675155591249>︲Added Points :  ( {amount} )**\ `n"
+                f"-# **1<:emoji_25:1550309714330390538>︲Points Addition Officer :  {ctx.author.mention} **",
             )
         )
 
@@ -129,7 +126,6 @@ class PointsHours(commands.Cog):
                 f"-# **<:emoji_25:1550309714330390538>︲Hours Removal Officer :  {ctx.author.mention} **",
             )
         )
-
 
     @commands.command(name="Show-all", aliases=["show-all", "ShowAll"])
     async def show_all(self, ctx: commands.Context):
