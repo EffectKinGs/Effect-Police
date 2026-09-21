@@ -124,8 +124,8 @@ class PointsHours(commands.Cog):
         await ctx.send(
             embed=utils.base_embed(
                 "**<:MTRP:1551676689212248215>︲REmove HouRs .**",
-                f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}\n"
-                f"-# **<:emoji_24:1550309675155591249>︲Removed Hours :  ( {utils.format_duration(hours * 3600)} )\n"
+                f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**\n"
+                f"-# **<:emoji_24:1550309675155591249>︲Removed Hours :  ( {utils.format_duration(hours * 3600)} )**\n"
                 f"-# **<:emoji_25:1550309714330390538>︲Hours Removal Officer :  {ctx.author.mention} **",
             )
         )
