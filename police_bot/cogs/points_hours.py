@@ -75,10 +75,10 @@ class PointsHours(commands.Cog):
         await utils.send_log(ctx.guild, "Add Point", f"Officer: {member.mention}\nPoint: {amount}\nResponsible Officer: {ctx.author.mention}")
         await ctx.send(
             embed=utils.base_embed(
-                "# <:emoji_187:1551676553413394552>︲Add PoinT .",
-                f"-# **<:emoji_12:1550308402520133632>︲OFficer : {member.mention}**\n"
-                f"-# **<:emoji_24:1550309675155591249>︲Added Points : ( {amount} )**\n"
-                f"-# ** <:emoji_25:1550309714330390538>︲Points Addition Officer : {ctx.author.mention} **",
+                "**<:emoji_187:1551676553413394552>︲Add PoinT .**",
+                f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**\n"
+                f"-# **<:emoji_24:1550309675155591249>︲Added Points :  ( {amount} )**\n"
+                f"-# **<:emoji_25:1550309714330390538>︲Points Addition Officer :  {ctx.author.mention} **",
             )
         )
 
@@ -91,10 +91,10 @@ class PointsHours(commands.Cog):
         await utils.send_log(ctx.guild, "Remove Point", f"Officer: {member.mention}\nPoint: {amount}\nResponsible Officer: {ctx.author.mention}")
         await ctx.send(
             embed=utils.base_embed(
-                "Remove Point",
-                f"**<:emoji_143:1542635684286963732> - Officer : {member.mention}\n"
-                f"<:ETRP_28:1499883636110135476> - Point : ( {amount} )\n"
-                f"<:ETRP_145:1542162076255002624> - The Responsible Military Officer : {ctx.author.mention} **",
+                "**<:MTRP:1551676689212248215>︲Remove Points .**",
+                f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**\n"
+                f"-# **<:emoji_24:1550309675155591249>︲Removed Points :  ( {amount} )**\n"
+                f"-# **<:emoji_25:1550309714330390538>︲Points Removal Officer :  {ctx.author.mention} **",
             )
         )
 
@@ -107,10 +107,10 @@ class PointsHours(commands.Cog):
         await utils.send_log(ctx.guild, "Add Hours", f"Officer: {member.mention}\nHours: {hours}\nResponsible Officer: {ctx.author.mention}")
         await ctx.send(
             embed=utils.base_embed(
-                "Add Hours",
-                f"**<:emoji_143:1542635684286963732> - Officer : {member.mention}\n"
-                f"<:ETRP_75:1500185654015823924> - Hours : ( {utils.format_duration(hours * 3600)} )\n"
-                f"<:ETRP_145:1542162076255002624> - The Responsible Military Officer : {ctx.author.mention}**",
+                "**<:emoji_187:1551676553413394552>︲Add HouRs .**",
+                f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**\n"
+                f"-# **<:emoji_24:1550309675155591249>︲Added Hours :  ( {utils.format_duration(hours * 3600)} )**\n"
+                f"-# **<:emoji_25:1550309714330390538>︲Hours Addition Officer :  {ctx.author.mention}**",
             )
         )
 
@@ -123,10 +123,10 @@ class PointsHours(commands.Cog):
         await utils.send_log(ctx.guild, "Remove Hours", f"Officer: {member.mention}\nHours: {hours}\nResponsible Officer: {ctx.author.mention}")
         await ctx.send(
             embed=utils.base_embed(
-                "Remove Hours",
-                f"**<:emoji_143:1542635684286963732> - Officer : {member.mention}\n"
-                f"<:ETRP_75:1500185654015823924> - Hours : ( {utils.format_duration(hours * 3600)} )\n"
-                f"<:ETRP_145:1542162076255002624> - The Responsible Military Officer : {ctx.author.mention} **",
+                "**<:MTRP:1551676689212248215>︲REmove HouRs .**",
+                f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}\n"
+                f"-# **<:emoji_24:1550309675155591249>︲Removed Hours :  ( {utils.format_duration(hours * 3600)} )\n"
+                f"-# **<:emoji_25:1550309714330390538>︲Hours Removal Officer :  {ctx.author.mention} **",
             )
         )
 
