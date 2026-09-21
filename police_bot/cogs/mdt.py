@@ -29,7 +29,7 @@ async def _get_target_channel(guild: discord.Guild, record_type: str) -> discord
 
 def _mdt_view_v2(admin_mention: str, character_id: str, suspect_name: str, charge: str, fine: str, image_link: str) -> discord.ui.LayoutView:
     view = discord.ui.LayoutView(timeout=None)
-    container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
+    container = discord.ui.Container(accent_color=discord.Color.from_str("#01FFFE"))
     container.add_item(discord.ui.TextDisplay(
         "# <:emoji_45:1550961724331397231> ︲ MDT Record"
     ))
@@ -51,7 +51,7 @@ def _mdt_view_v2(admin_mention: str, character_id: str, suspect_name: str, charg
 
 def _vehicle_impound_view_v2(admin_mention: str, character_id: str, suspect_name: str, vehicle_type: str, plate: str, charge: str, image_link: str) -> discord.ui.LayoutView:
     view = discord.ui.LayoutView(timeout=None)
-    container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
+    container = discord.ui.Container(accent_color=discord.Color.from_str("#01FFFE"))
     container.add_item(discord.ui.TextDisplay(
         "# <:emoji_45:1550961724331397231> ︲ Vehicle Impound"
     ))
@@ -74,7 +74,7 @@ def _vehicle_impound_view_v2(admin_mention: str, character_id: str, suspect_name
 
 def _suspect_statement_view_v2(admin_mention: str, character_id: str, suspect_name: str, case: str, justification: str, image_link: str) -> discord.ui.LayoutView:
     view = discord.ui.LayoutView(timeout=None)
-    container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
+    container = discord.ui.Container(accent_color=discord.Color.from_str("#01FFFE"))
     container.add_item(discord.ui.TextDisplay(
         "# <:emoji_45:1550961724331397231> ︲ Suspect Statement"
     ))
