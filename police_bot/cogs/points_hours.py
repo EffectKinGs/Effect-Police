@@ -9,20 +9,45 @@ import database as db
 import utils
 
 
-async def _check_point_embed(member: discord.Member) -> discord.Embed:
+def _v2_view(*items: discord.ui.Item, accent: discord.Colour | None = None) -> discord.ui.LayoutView:
+    """يبني LayoutView مع Container (Embeds V2)"""
+    container = discord.ui.Container(*items, accent_colour=accent) if accent else discord.ui.Container(*items)
+    view = discord.ui.LayoutView(timeout=None)
+    view.add_item(container)
+    return view
+
+
+def _v2_view_from_embed(embed: discord.Embed) -> discord.ui.LayoutView:
+    """يحوّل Embed عادي إلى LayoutView V2"""
+    items: list[discord.ui.Item] = []
+    if embed.title:
+        items.append(discord.ui.TextDisplay(f"## {embed.title}"))
+    if embed.description:
+        items.append(discord.ui.TextDisplay(embed.description))
+    if not items:
+        items.append(discord.ui.TextDisplay("\u200b"))
+    return _v2_view(*items)
+
+
+async def _check_point_view(member: discord.Member) -> discord.ui.LayoutView:
     points, hours = await db.get_points_hours(member.id)
     session_total = await db.total_duration_seconds(member.id, member.guild.id)
     total = session_total + int(hours * 3600)
-    lines = [
-        f"-# ** <:emoji_36:1550311975643254955>︲OFficer : {member.mention}**",
-        f"-# ** <:emoji_12:1550308402520133632>︲Your PoinTs : ( {points} )**",
-        f"-# ** <:emoji_10:1550308354759327835>︲Your Field Commencement Time : ( {utils.format_duration(total)} )**",
+
+    items: list[discord.ui.Item] = [
+        discord.ui.TextDisplay("# <:emoji_5:1550307911115218974>︲PoinTs RepoRt ."),
+        discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
+        discord.ui.TextDisplay(
+            "\n".join(
+                [
+                    f"-# ** <:emoji_36:1550311975643254955>︲OFficer : {member.mention}**",
+                    f"-# ** <:emoji_12:1550308402520133632>︲Your PoinTs : ( {points} )**",
+                    f"-# ** <:emoji_10:1550308354759327835>︲Your Field Commencement Time : ( {utils.format_duration(total)} )**",
+                ]
+            )
+        ),
     ]
-    return utils.base_embed(
-        "# <:emoji_5:1550307911115218974>︲PoinTs RepoRt .",
-        "\n".join(lines),
-        panel_key="points",
-    )
+    return _v2_view(*items)
 
 
 async def _top10_view(guild: discord.Guild) -> discord.ui.LayoutView:
@@ -34,7 +59,7 @@ async def _top10_view(guild: discord.Guild) -> discord.ui.LayoutView:
     ]
 
     if not rows:
-        items.append(discord.ui.TextDisplay("-# ** <a:MTRP:1550940537492865124>  -  لاتوجد بينات مُسجله حتى الان . **"))
+        items.append(discord.ui.TextDisplay("-# ** <a:MTRP:1550940537492865124>  -  لاتوجد بيانات مُسجله حتى الان . **"))
     else:
         for index, (user_id, points, hours) in enumerate(rows, start=1):
             member = guild.get_member(user_id)
@@ -52,10 +77,7 @@ async def _top10_view(guild: discord.Guild) -> discord.ui.LayoutView:
             if index < len(rows):
                 items.append(discord.ui.Separator(spacing=discord.SeparatorSpacing.small))
 
-    container = discord.ui.Container(*items)
-    view = discord.ui.LayoutView(timeout=None)
-    view.add_item(container)
-    return view
+    return _v2_view(*items)
 
 
 class PointsPanelView(discord.ui.View):
@@ -67,7 +89,8 @@ class PointsPanelView(discord.ui.View):
         if not isinstance(interaction.user, discord.Member):
             await interaction.response.send_message("هذه اللوحة تعمل داخل السيرفر فقط.", ephemeral=True)
             return
-        await interaction.response.send_message(embed=await _check_point_embed(interaction.user), ephemeral=True)
+        view = await _check_point_view(interaction.user)
+        await interaction.response.send_message(view=view, ephemeral=True)
 
     @discord.ui.button(label="𝗧𝗢𝗣 𝟭𝟬", style=discord.ButtonStyle.secondary, custom_id="points_panel:top10", row=0)
     async def top10(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -89,17 +112,21 @@ class PointsHours(commands.Cog):
         amount = abs(amount)
         await db.add_points(member.id, amount)
         await utils.send_log(ctx.guild, "Add Point", f"Officer: {member.mention}\nPoint: {amount}\nResponsible Officer: {ctx.author.mention}")
-        lines = [
-            f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
-            f"-# **<:emoji_24:1550309675155591249>︲Added Points :  ( {amount} )**",
-            f"-# **<:emoji_25:1550309714330390538>︲Points Addition Officer :  {ctx.author.mention} **",
-        ]
-        await ctx.send(
-            embed=utils.base_embed(
-                "**<:emoji_187:1551676553413394552>︲Add PoinT .**",
-                "\n".join(lines),
-            )
+
+        view = _v2_view(
+            discord.ui.TextDisplay("**<:emoji_187:1551676553413394552>︲Add PoinT .**"),
+            discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
+            discord.ui.TextDisplay(
+                "\n".join(
+                    [
+                        f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
+                        f"-# **<:emoji_24:1550309675155591249>︲Added Points :  ( {amount} )**",
+                        f"-# **<:emoji_25:1550309714330390538>︲Points Addition Officer :  {ctx.author.mention} **",
+                    ]
+                )
+            ),
         )
+        await ctx.send(view=view)
 
     @commands.command(name="remove-point", aliases=["remove-Point"])
     async def remove_point_text(self, ctx: commands.Context, member: discord.Member, amount: int):
@@ -108,17 +135,21 @@ class PointsHours(commands.Cog):
         amount = abs(amount)
         await db.add_points(member.id, -amount)
         await utils.send_log(ctx.guild, "Remove Point", f"Officer: {member.mention}\nPoint: {amount}\nResponsible Officer: {ctx.author.mention}")
-        lines = [
-            f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
-            f"-# **<:emoji_24:1550309675155591249>︲Removed Points :  ( {amount} )**",
-            f"-# **<:emoji_25:1550309714330390538>︲Points Removal Officer :  {ctx.author.mention} **",
-        ]
-        await ctx.send(
-            embed=utils.base_embed(
-                "**<:MTRP:1551676689212248215>︲REmove PoinTs .**",
-                "\n".join(lines),
-            )
+
+        view = _v2_view(
+            discord.ui.TextDisplay("**<:MTRP:1551676689212248215>︲REmove PoinTs .**"),
+            discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
+            discord.ui.TextDisplay(
+                "\n".join(
+                    [
+                        f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
+                        f"-# **<:emoji_24:1550309675155591249>︲Removed Points :  ( {amount} )**",
+                        f"-# **<:emoji_25:1550309714330390538>︲Points Removal Officer :  {ctx.author.mention} **",
+                    ]
+                )
+            ),
         )
+        await ctx.send(view=view)
 
     @commands.command(name="add-hours", aliases=["add-Hours"])
     async def add_hours_text(self, ctx: commands.Context, member: discord.Member, hours: float):
@@ -127,17 +158,21 @@ class PointsHours(commands.Cog):
         hours = abs(hours)
         await db.add_hours(member.id, hours)
         await utils.send_log(ctx.guild, "Add Hours", f"Officer: {member.mention}\nHours: {hours}\nResponsible Officer: {ctx.author.mention}")
-        lines = [
-            f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
-            f"-# **<:emoji_24:1550309675155591249>︲Added Hours :  ( {utils.format_duration(hours * 3600)} )**",
-            f"-# **<:emoji_25:1550309714330390538>︲Hours Addition Officer :  {ctx.author.mention}**",
-        ]
-        await ctx.send(
-            embed=utils.base_embed(
-                "**<:emoji_187:1551676553413394552>︲Add HouRs .**",
-                "\n".join(lines),
-            )
+
+        view = _v2_view(
+            discord.ui.TextDisplay("**<:emoji_187:1551676553413394552>︲Add HouRs .**"),
+            discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
+            discord.ui.TextDisplay(
+                "\n".join(
+                    [
+                        f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
+                        f"-# **<:emoji_24:1550309675155591249>︲Added Hours :  ( {utils.format_duration(hours * 3600)} )**",
+                        f"-# **<:emoji_25:1550309714330390538>︲Hours Addition Officer :  {ctx.author.mention}**",
+                    ]
+                )
+            ),
         )
+        await ctx.send(view=view)
 
     @commands.command(name="remove-hours", aliases=["remove-Hours"])
     async def remove_hours_text(self, ctx: commands.Context, member: discord.Member, hours: float):
@@ -146,27 +181,36 @@ class PointsHours(commands.Cog):
         hours = abs(hours)
         await db.add_hours(member.id, -hours)
         await utils.send_log(ctx.guild, "Remove Hours", f"Officer: {member.mention}\nHours: {hours}\nResponsible Officer: {ctx.author.mention}")
-        lines = [
-            f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
-            f"-# **<:emoji_24:1550309675155591249>︲Removed Hours :  ( {utils.format_duration(hours * 3600)} )**",
-            f"-# **<:emoji_25:1550309714330390538>︲Hours Removal Officer :  {ctx.author.mention} **",
-        ]
-        await ctx.send(
-            embed=utils.base_embed(
-                "**<:MTRP:1551676689212248215>︲REmove HouRs .**",
-                "\n".join(lines),
-            )
+
+        view = _v2_view(
+            discord.ui.TextDisplay("**<:MTRP:1551676689212248215>︲REmove HouRs .**"),
+            discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
+            discord.ui.TextDisplay(
+                "\n".join(
+                    [
+                        f"-# **<:emoji_12:1550308402520133632>︲OFficer :  {member.mention}**",
+                        f"-# **<:emoji_24:1550309675155591249>︲Removed Hours :  ( {utils.format_duration(hours * 3600)} )**",
+                        f"-# **<:emoji_25:1550309714330390538>︲Hours Removal Officer :  {ctx.author.mention} **",
+                    ]
+                )
+            ),
         )
+        await ctx.send(view=view)
 
     @commands.command(name="Show-all", aliases=["show-all", "ShowAll"])
     async def show_all(self, ctx: commands.Context):
         if not isinstance(ctx.guild, discord.Guild) or not isinstance(ctx.author, discord.Member) or not utils.has_any_role(ctx.author, config.SHOW_ALL_ROLE_IDS):
             return
         rows = await db.top_points_hours(1000)
+
+        items: list[discord.ui.Item] = [
+            discord.ui.TextDisplay("# <:emoji_46:1550990951525122158> ︲ List All The PoinTs ."),
+            discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
+        ]
+
         if not rows:
-            description = "**لا توجد بيانات مسجلة حتى الآن.**"
+            items.append(discord.ui.TextDisplay("-# ** <a:MTRP:1550940537492865124>  -  لاتوجد بيانات مُسجله حتى الان . **"))
         else:
-            blocks = []
             for index, (user_id, points, hours) in enumerate(rows, start=1):
                 member = ctx.guild.get_member(user_id)
                 mention = member.mention if member else f"<@{user_id}>"
@@ -178,15 +222,11 @@ class PointsHours(commands.Cog):
                         f"-# <:emoji_10:1550308354759327835>︲Officer Working Hours : **{utils.format_duration(total)}**",
                     ]
                 )
-                blocks.append(block)
-            description = "\n\n".join(blocks)
-        embed = utils.base_embed(
-            "<:emoji_46:1550990951525122158> ︲ List All The PoinTs .",
-            description,
-            image_url="",
-            panel_key="points",
-        )
-        await ctx.send(view=utils.components_v2_view(embed))
+                items.append(discord.ui.TextDisplay(block))
+                if index < len(rows):
+                    items.append(discord.ui.Separator(spacing=discord.SeparatorSpacing.small))
+
+        await ctx.send(view=_v2_view(*items))
 
     @app_commands.command(name="points-panel", description="نشر لوحة نقاط العسكريين")
     @app_commands.default_permissions(administrator=True)
@@ -195,6 +235,7 @@ class PointsHours(commands.Cog):
             await interaction.response.send_message("❌ ما تملك صلاحية استخدام هذا الأمر.", ephemeral=True)
             return
         await interaction.response.defer(ephemeral=True)
+
         description = "**<:alert:1551325711699026021> - From Here, You Can View Your Military Points And Check The TOP 10 Military Personnel .**"
         embed = utils.base_embed(
             "<:emoji_14:1550308636214169610> ︲Officer PoinTs .",
