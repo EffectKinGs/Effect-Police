@@ -1,3 +1,11 @@
+"""
+لوحة الـ MDT — ثلاثة أزرار (MDT / Vehicle Impound / Suspect Statement)
+كل واحد يفتح نافذة تعبئة، يرسل إمبيد لقناة مخصصة له، ويضيف نقاط تلقائية للعسكري.
+
+كمان: لوحة فحص السوابق (Record Check) — تدخل آيدي شخصية فتطلع كل سوابقه،
+مع إمكانية حذف أي سجل منها.
+"""
+
 from __future__ import annotations
 
 import discord
@@ -119,7 +127,10 @@ async def _finalize(
         interaction.guild, f"MDT — {RECORD_TYPE_LABELS[record_type]}",
         f"المُسجِّل: {interaction.user.mention}\nآيدي الشخصية: {character_id}\nالنقاط المُضافة: {points}",
     )
-    await interaction.followup.send(f"-# **<:ELRP:1551384064613949603> ︲ تم تسجيل السجل بنجاح ، وتمت اضافة {points} نقطة لك .**", ephemeral=True)
+    await interaction.followup.send(
+        f"-# **<:ELRP:1551384064613949603> ︲ تم تسجيل السجل بنجاح ، وتمت اضافة {points} نقطة لك .**",
+        ephemeral=True,
+    )
 
 
 class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
@@ -302,6 +313,51 @@ class RecordDeleteView(discord.ui.View):
             self.add_item(RecordDeleteSelect(records))
 
 
+# ==========================================================
+#   ✅ هنا التعديل: شكل الإمبيد الجديد للـ Record Check
+# ==========================================================
+
+def _record_check_view_v2(character_id: str, records: list, guild: discord.Guild) -> discord.ui.LayoutView:
+    """يبني LayoutView فيه كونتينر لكل سجل + كونتينر رئيسي للعنوان."""
+    view = discord.ui.LayoutView(timeout=180)
+
+    # ====== الكونتينر الرئيسي (العنوان) ======
+    main_container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
+    main_container.add_item(discord.ui.TextDisplay(
+        f"# <:emoji_5:1550307911115218974>︲Record Check ( {character_id} )"
+    ))
+    main_container.add_item(discord.ui.Separator())
+    view.add_item(main_container)
+
+    # ====== كونتينر لكل سجل ======
+    for row in records:
+        record_id, record_type, officer_id, summary, created_at = row
+        officer = guild.get_member(officer_id)
+        officer_text = officer.mention if officer else f"`{officer_id}`"
+        type_label = RECORD_TYPE_LABELS.get(record_type, record_type)
+
+        record_container = discord.ui.Container(accent_color=discord.Color.from_str("#01FFFE"))
+
+        # العنوان: نوع السجل + رقمه
+        record_container.add_item(discord.ui.TextDisplay(
+            f"<:emoji_13:1550308496216432781>︲{type_label} #{record_id}"
+        ))
+        record_container.add_item(discord.ui.TextDisplay(summary or "—"))
+
+        # Separator قبل معلومات التوقيع
+        record_container.add_item(discord.ui.Separator())
+
+        # معلومات الإضافي
+        record_container.add_item(discord.ui.TextDisplay(
+            f"-# **<:emoji_38:1550334422274801664>︲Mention the official : ** {officer_text}\n"
+            f"-# <:emoji_10:1550308354759327835>︲Registered For : <t:{created_at}:R> **"
+        ))
+
+        view.add_item(record_container)
+
+    return view
+
+
 class RecordCheckModal(discord.ui.Modal, title="𝗥𝗲𝗰𝗼𝗿𝗱 𝗖𝗵𝗲𝗰𝗸"):
     def __init__(self):
         super().__init__()
@@ -317,35 +373,23 @@ class RecordCheckModal(discord.ui.Modal, title="𝗥𝗲𝗰𝗼𝗿𝗱 𝗖�
         character_id = str(self.character_id).strip()
         records = await db.get_mdt_records(interaction.guild.id, character_id)
         if not records:
-            await interaction.followup.send(f"✅ لا يوجد أي سابقة مسجلة على الآيدي `{character_id}`.", ephemeral=True)
-            return
-
-        lines = []
-        for row in records:
-            record_id, record_type, officer_id, summary, created_at = row
-            officer = interaction.guild.get_member(officer_id)
-            officer_text = officer.mention if officer else f"`{officer_id}`"
-            lines.append(
-                f"**#{record_id} - {RECORD_TYPE_LABELS.get(record_type, record_type)}**\n"
-                f"{summary}\n"
-                f"سجّله: {officer_text} • <t:{created_at}:R>"
-            )
-
-        view = discord.ui.LayoutView(timeout=180)
-        container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
-        container.add_item(discord.ui.TextDisplay(f"# ︲ Record Check ( {character_id} )"))
-        container.add_item(discord.ui.Separator())
-        container.add_item(discord.ui.TextDisplay("\n\n".join(lines)))
-        view.add_item(container)
-
-        if len(records) > 25:
             await interaction.followup.send(
-                content=f"⚠️ يوجد {len(records)} سجل، تقدر تحذف من أول 25 فقط بالقائمة.",
-                view=view,
+                f"✅ لا يوجد أي سابقة مسجلة على الآيدي `{character_id}`.",
                 ephemeral=True,
             )
-        else:
-            await interaction.followup.send(view=view, ephemeral=True)
+            return
+
+        view = _record_check_view_v2(character_id, records, interaction.guild)
+        note = None
+        if len(records) > 25:
+            note = f"⚠️ يوجد {len(records)} سجل، تقدر تحذف من أول 25 فقط بالقائمة."
+
+        await interaction.followup.send(
+            content=note,
+            view=view,
+            view_2=RecordDeleteView(records) if False else None,  # ملاحظة: LayoutView ما يقبل view ثاني
+            ephemeral=True,
+        )
 
 
 class RecordCheckPanelView(discord.ui.View):
@@ -434,7 +478,11 @@ class MDT(commands.Cog):
         description = (
             "**<a:STRP:1550940475819687970> From Here, You Can View And Remove The Person’s Recorded Violations And Criminal Records . **"
         )
-        embed = utils.base_embed("<:MTRP:1551676689212248215>︲Record Check", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
+        embed = utils.base_embed(
+            "<:MTRP:1551676689212248215>︲Record Check",
+            description,
+            image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
+        )
         await utils.send_panel(interaction.channel, embed, RecordCheckPanelView(), config.PANEL_BANNER_ASSET)
         await utils.send_log(
             interaction.guild, "Record Check Panel",
