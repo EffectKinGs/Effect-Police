@@ -1,6 +1,6 @@
 """
 لوحة الـ MDT — ثلاثة أزرار (MDT / Vehicle Impound / Suspect Statement)
-كل واحد يفتح نافذة تعبئة، يرسل إمبيد لقناة مخصصة له، ويضيف نقاط تلقائية للعسكري.
+كل واحد يفتح نافذة تعبئة، يرسل إمبيد لقناة مخصصة له، ويضيف نقاط تلقائية.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ def _channel_key(record_type: str, guild_id: int) -> str:
     return f"mdt_{record_type}_channel_id:{guild_id}"
 
 
-async def _get_target_channel(guild: discord.Guild, record_type: str) -> discord.TextChannel | None:
+async def _get_target_channel(guild: discord.Guild, record_type: str):
     channel_id = await db.get_setting(_channel_key(record_type, guild.id))
     if not channel_id:
         return None
@@ -33,7 +33,7 @@ async def _get_target_channel(guild: discord.Guild, record_type: str) -> discord
 
 
 # ==========================================================
-#   ✅ الإمبيدات الاحترافية (V1) — تدعم الصورة الكبيرة
+#   ✅ الإمبيدات (V1) — تدعم الصورة الكبيرة
 # ==========================================================
 
 def _mdt_embed(admin_mention, character_id, suspect_name, charge, fine, image_link):
@@ -116,7 +116,10 @@ async def _finalize(interaction, *, record_type, character_id, summary, embed, p
     try:
         await channel.send(embed=embed)
     except (discord.Forbidden, discord.HTTPException):
-        await interaction.followup.send("⚠️ تعذر الإرسال لقناة الاستقبال، تأكد من صلاحيات البوت فيها.", ephemeral=True)
+        await interaction.followup.send(
+            "⚠️ تعذر الإرسال لقناة الاستقبال، تأكد من صلاحيات البوت فيها.",
+            ephemeral=True,
+        )
         return
 
     await db.add_mdt_record(interaction.guild.id, record_type, character_id, interaction.user.id, summary)
@@ -164,8 +167,8 @@ class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
 
         embed = _mdt_embed(admin_mention, character_id, suspect_name, charge, fine, image_link)
         summary = f"Suspect: {suspect_name} | Charge: {charge} | Fine: {fine}"
-        await _finalize(interaction, record_type="mdt", character_id=character_id, summary=summary,
-                        embed=embed, points=config.MDT_POINTS)
+        await _finalize(interaction, record_type="mdt", character_id=character_id,
+                        summary=summary, embed=embed, points=config.MDT_POINTS)
 
 
 class VehicleImpoundModal(discord.ui.Modal, title="𝗩𝗲𝗵𝗶𝗰𝗹𝗲 𝗜𝗺𝗽𝗼𝘂𝗻𝗱"):
@@ -200,8 +203,8 @@ class VehicleImpoundModal(discord.ui.Modal, title="𝗩𝗲𝗵𝗶𝗰𝗹𝗲 
 
         embed = _vehicle_impound_embed(admin_mention, character_id, suspect_name, vehicle_type, plate, charge, image_link)
         summary = f"Suspect: {suspect_name} | Vehicle: {vehicle_type} | Plate: {plate} | Charge: {charge}"
-        await _finalize(interaction, record_type="vehicle_impound", character_id=character_id, summary=summary,
-                        embed=embed, points=config.VEHICLE_IMPOUND_POINTS)
+        await _finalize(interaction, record_type="vehicle_impound", character_id=character_id,
+                        summary=summary, embed=embed, points=config.VEHICLE_IMPOUND_POINTS)
 
 
 class SuspectStatementModal(discord.ui.Modal, title="𝗦𝘂𝘀𝗽𝗲𝗰𝘁 𝗦𝘁𝗮𝘁𝗲𝗺𝗲𝗻𝘁"):
@@ -210,8 +213,10 @@ class SuspectStatementModal(discord.ui.Modal, title="𝗦𝘂𝘀𝗽𝗲𝗰�
         self.character_id = discord.ui.TextInput(placeholder="", required=True, max_length=50)
         self.suspect_name = discord.ui.TextInput(placeholder="", required=True, max_length=100)
         self.case = discord.ui.TextInput(placeholder="", required=True, max_length=300)
-        self.justification = discord.ui.TextInput(placeholder="", required=True, max_length=1000,
-                                                  style=discord.TextStyle.paragraph)
+        self.justification = discord.ui.TextInput(
+            placeholder="", required=True, max_length=1000,
+            style=discord.TextStyle.paragraph,
+        )
         self.image_link = discord.ui.TextInput(placeholder="", required=False, max_length=500)
         self.add_item(discord.ui.Label(text="Id Character / رقم هوية الشخص", component=self.character_id))
         self.add_item(discord.ui.Label(text="Suspect Name / اسم المُتهم", component=self.suspect_name))
@@ -234,8 +239,8 @@ class SuspectStatementModal(discord.ui.Modal, title="𝗦𝘂𝘀𝗽𝗲𝗰�
 
         embed = _suspect_statement_embed(admin_mention, character_id, suspect_name, case, justification, image_link)
         summary = f"Suspect: {suspect_name} | Case: {case} | Justification: {justification[:200]}"
-        await _finalize(interaction, record_type="suspect_statement", character_id=character_id, summary=summary,
-                        embed=embed, points=config.SUSPECT_STATEMENT_POINTS)
+        await _finalize(interaction, record_type="suspect_statement", character_id=character_id,
+                        summary=summary, embed=embed, points=config.SUSPECT_STATEMENT_POINTS)
 
 
 def _can_use_mdt(member):
@@ -291,8 +296,10 @@ class RecordDeleteSelect(discord.ui.Select):
         record_id = int(self.values[0])
         deleted = await db.delete_mdt_record(record_id)
         if deleted and interaction.guild:
-            await utils.send_log(interaction.guild, "MDT Record Deleted",
-                                 f"المنفذ: {interaction.user.mention}\nرقم السجل: {record_id}")
+            await utils.send_log(
+                interaction.guild, "MDT Record Deleted",
+                f"المنفذ: {interaction.user.mention}\nرقم السجل: {record_id}",
+            )
         await interaction.response.send_message(
             "✅ تم حذف السجل." if deleted else "⚠️ ما تم العثور على السجل.",
             ephemeral=True,
@@ -321,45 +328,47 @@ class RecordCheckModal(discord.ui.Modal, title="𝗥𝗲𝗰𝗼𝗿𝗱 𝗖�
         character_id = str(self.character_id).strip()
         records = await db.get_mdt_records(interaction.guild.id, character_id)
         if not records:
-            await interaction.followup.send(f"✅ لا يوجد أي سابقة مسجلة على الآيدي `{character_id}`.", ephemeral=True)
+            await interaction.followup.send(
+                f"✅ لا يوجد أي سابقة مسجلة على الآيدي `{character_id}`.",
+                ephemeral=True,
+            )
             return
 
-        # ====== كل سجل بكونتينر منفصل ======
-        view = discord.ui.LayoutView(timeout=180)
-
-        # العنوان الرئيسي
-        main_container = discord.ui.Container(accent_color=discord.Color.from_str("#2b2d31"))
-        main_container.add_item(discord.ui.TextDisplay(
-            f"# <:emoji_5:1550307911115218974>︲Record Check ( {character_id} )"
-        ))
-        main_container.add_item(discord.ui.Separator())
-        view.add_item(main_container)
-
-        for row in records[:10]:  # أول 10 سجلات فقط (ديسكورد حد)
+        # ====== كل سجل بـ Embed منفصل ======
+        embeds = []
+        for row in records[:10]:
             record_id, record_type, officer_id, summary, created_at = row
             officer = interaction.guild.get_member(officer_id)
             officer_text = officer.mention if officer else f"`{officer_id}`"
 
-            c = discord.ui.Container(accent_color=discord.Color.from_str("#01FFFE"))
-            c.add_item(discord.ui.TextDisplay(
-                f"<:emoji_13:1550308496216432781>︲{RECORD_TYPE_LABELS.get(record_type, record_type)} #{record_id}"
-            ))
-            c.add_item(discord.ui.TextDisplay(summary or "—"))
-            c.add_item(discord.ui.Separator())
-            c.add_item(discord.ui.TextDisplay(
-                f"-# **<:emoji_38:1550334422274801664>︲Mention the official : ** {officer_text}\n"
-                f"-# <:emoji_10:1550308354759327835>︲Registered For : <t:{created_at}:R> **"
-            ))
-            view.add_item(c)
+            e = discord.Embed(
+                title=f"<:emoji_5:1550307911115218974>︲Record Check ( {character_id} )",
+                color=discord.Color.from_str("#01FFFE"),
+            )
+            e.add_field(
+                name=f"<:emoji_13:1550308496216432781>︲{RECORD_TYPE_LABELS.get(record_type, record_type)} #{record_id}",
+                value=summary or "—",
+                inline=False,
+            )
+            e.add_field(
+                name="\u200b",
+                value=(
+                    f"-# **<:emoji_38:1550334422274801664>︲Mention the official : ** {officer_text}\n"
+                    f"-# <:emoji_10:1550308354759327835>︲Registered For : <t:{created_at}:R> **"
+                ),
+                inline=False,
+            )
+            e.set_footer(text="System Police Effect .")
+            embeds.append(e)
 
-        await interaction.followup.send(view=view, ephemeral=True)
+        await interaction.followup.send(embeds=embeds[:10], ephemeral=True)
 
-        # قائمة الحذف برسالة منفصلة
-        await interaction.followup.send(
-            "**اختر سجل لحذفه:**",
-            view=RecordDeleteView(records),
-            ephemeral=True,
-        )
+        if records:
+            await interaction.followup.send(
+                "**اختر سجل لحذفه:**",
+                view=RecordDeleteView(records),
+                ephemeral=True,
+            )
 
 
 class RecordCheckPanelView(discord.ui.View):
