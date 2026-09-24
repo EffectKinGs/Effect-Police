@@ -1,8 +1,3 @@
-"""
-لوحة الـ MDT — ثلاثة أزرار (MDT / Vehicle Impound / Suspect Statement)
-كل واحد يفتح نافذة تعبئة، يرسل إمبيد لقناة مخصصة له، ويضيف نقاط تلقائية.
-"""
-
 from __future__ import annotations
 
 import discord
@@ -31,10 +26,6 @@ async def _get_target_channel(guild: discord.Guild, record_type: str):
     channel = guild.get_channel(int(channel_id))
     return channel if isinstance(channel, discord.TextChannel) else None
 
-
-# ==========================================================
-#   الإمبيدات
-# ==========================================================
 
 def _mdt_embed(admin_mention, character_id, suspect_name, charge, fine, image_link):
     embed = discord.Embed(
@@ -103,7 +94,7 @@ def _suspect_statement_embed(admin_mention, character_id, suspect_name, case, ju
     return embed
 
 
-async def _finalize(interaction, *, record_type, character_id, summary, embed, points):
+async def _finalize(interaction: discord.Interaction, *, record_type, character_id, summary, embed, points):
     channel = await _get_target_channel(interaction.guild, record_type)
     if channel is None:
         await interaction.followup.send(
@@ -130,10 +121,6 @@ async def _finalize(interaction, *, record_type, character_id, summary, embed, p
     )
 
 
-# ==========================================================
-#   المودالات
-# ==========================================================
-
 class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
     character_id = discord.ui.TextInput(label="Id Character / رقم هوية الشخص", required=True, max_length=50)
     suspect_name = discord.ui.TextInput(label="Suspect Name / اسم المُتهم", required=True, max_length=100)
@@ -141,7 +128,7 @@ class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
     fine = discord.ui.TextInput(label="Financial Fine / الغرامة المالية", required=True, max_length=100)
     image_link = discord.ui.TextInput(label="Image Link / رابط صورة", required=False, max_length=500)
 
-    async def on_submit(self, interaction):
+    async def on_submit(self, interaction: discord.Interaction):
         if interaction.guild is None:
             await interaction.response.send_message("هذه اللوحة تعمل داخل السيرفر فقط.", ephemeral=True)
             return
@@ -171,7 +158,7 @@ class VehicleImpoundModal(discord.ui.Modal, title="𝗩𝗲𝗵𝗶𝗰𝗹𝗲 
     charge = discord.ui.TextInput(label="Recorded Charge / التُهمة المُسجلة", required=True, max_length=300)
     image_link = discord.ui.TextInput(label="Image Link / رابط صورة", required=False, max_length=500)
 
-    async def on_submit(self, interaction):
+    async def on_submit(self, interaction: discord.Interaction):
         if interaction.guild is None:
             await interaction.response.send_message("هذه اللوحة تعمل داخل السيرفر فقط.", ephemeral=True)
             return
@@ -204,7 +191,7 @@ class SuspectStatementModal(discord.ui.Modal, title="𝗦𝘂𝘀𝗽𝗲𝗰�
     )
     image_link = discord.ui.TextInput(label="Image Link / رابط صورة", required=False, max_length=500)
 
-    async def on_submit(self, interaction):
+    async def on_submit(self, interaction: discord.Interaction):
         if interaction.guild is None:
             await interaction.response.send_message("هذه اللوحة تعمل داخل السيرفر فقط.", ephemeral=True)
             return
@@ -226,94 +213,10 @@ class SuspectStatementModal(discord.ui.Modal, title="𝗦𝘂𝘀𝗽𝗲𝗰�
         )
 
 
-# ==========================================================
-#   الصلاحيات
-# ==========================================================
-
-def _can_use_mdt(member):
-    try:
-        return utils.has_any_role(member, config.MDT_ALLOWED_ROLE_IDS)
-    except Exception:
-        return False
-
-
-def _can_manage_records(member):
-    try:
-        return utils.has_any_role(member, config.SYSTEM_ADMIN_ROLE_IDS)
-    except Exception:
-        return False
-
-
-# ==========================================================
-#   Views
-# ==========================================================
-
-class MDTPanelView(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(label="MDT", style=discord.ButtonStyle.secondary, custom_id="mdt_panel:mdt", row=0)
-    async def mdt_button(self, interaction, button):
-        if not isinstance(interaction.user, discord.Member) or not _can_use_mdt(interaction.user):
-            await interaction.response.send_message("❌ هذه اللوحة مخصصة للضباط فقط.", ephemeral=True)
-            return
-        await interaction.response.send_modal(MDTModal())
-
-    @discord.ui.button(label="Vehicle Impound", style=discord.ButtonStyle.secondary, custom_id="mdt_panel:vehicle", row=0)
-    async def vehicle_button(self, interaction, button):
-        if not isinstance(interaction.user, discord.Member) or not _can_use_mdt(interaction.user):
-            await interaction.response.send_message("❌ هذه اللوحة مخصصة للضباط فقط.", ephemeral=True)
-            return
-        await interaction.response.send_modal(VehicleImpoundModal())
-
-    @discord.ui.button(label="Suspect Statement", style=discord.ButtonStyle.secondary, custom_id="mdt_panel:statement", row=0)
-    async def statement_button(self, interaction, button):
-        if not isinstance(interaction.user, discord.Member) or not _can_use_mdt(interaction.user):
-            await interaction.response.send_message("❌ هذه اللوحة مخصصة للضباط فقط.", ephemeral=True)
-            return
-        await interaction.response.send_modal(SuspectStatementModal())
-
-
-class RecordDeleteSelect(discord.ui.Select):
-    def __init__(self, records):
-        options = [
-            discord.SelectOption(
-                label=f"#{row[0]} - {RECORD_TYPE_LABELS.get(row[1], row[1])}"[:100],
-                description=(row[3][:100] if row[3] else None),
-                value=str(row[0]),
-            )
-            for row in records[:25]
-        ]
-        super().__init__(placeholder="اختر سجل لحذفه...", options=options, min_values=1, max_values=1)
-
-    async def callback(self, interaction):
-        if not isinstance(interaction.user, discord.Member) or not _can_manage_records(interaction.user):
-            await interaction.response.send_message("❌ حذف السوابق للأدمن فقط.", ephemeral=True)
-            return
-        record_id = int(self.values[0])
-        deleted = await db.delete_mdt_record(record_id)
-        if deleted and interaction.guild:
-            await utils.send_log(
-                interaction.guild, "MDT Record Deleted",
-                f"المنفذ: {interaction.user.mention}\nرقم السجل: {record_id}",
-            )
-        await interaction.response.send_message(
-            "✅ تم حذف السجل." if deleted else "⚠️ ما تم العثور على السجل.",
-            ephemeral=True,
-        )
-
-
-class RecordDeleteView(discord.ui.View):
-    def __init__(self, records):
-        super().__init__(timeout=180)
-        if records:
-            self.add_item(RecordDeleteSelect(records))
-
-
 class RecordCheckModal(discord.ui.Modal, title="𝗥𝗲𝗰𝗼𝗿𝗱 𝗖𝗵𝗲𝗰𝗸"):
     character_id = discord.ui.TextInput(label="Id Character / رقم هوية الشخص", required=True, max_length=50)
 
-    async def on_submit(self, interaction):
+    async def on_submit(self, interaction: discord.Interaction):
         if interaction.guild is None:
             await interaction.response.send_message("هذه اللوحة تعمل داخل السيرفر فقط.", ephemeral=True)
             return
@@ -356,11 +259,88 @@ class RecordCheckModal(discord.ui.Modal, title="𝗥𝗲𝗰𝗼𝗿𝗱 𝗖�
 
         await interaction.followup.send(embeds=embeds, ephemeral=True)
 
-        await interaction.followup.send(
-            "**اختر سجل لحذفه:**",
-            view=RecordDeleteView(records),
+        if _can_manage_records(interaction.user):
+            await interaction.followup.send(
+                "**اختر سجل لحذفه:**",
+                view=RecordDeleteView(records),
+                ephemeral=True,
+            )
+
+
+def _can_use_mdt(member: discord.Member) -> bool:
+    try:
+        return utils.has_any_role(member, config.MDT_ALLOWED_ROLE_IDS)
+    except Exception:
+        return False
+
+
+def _can_manage_records(member: discord.Member) -> bool:
+    try:
+        return utils.has_any_role(member, config.SYSTEM_ADMIN_ROLE_IDS)
+    except Exception:
+        return False
+
+
+class MDTPanelView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="MDT", style=discord.ButtonStyle.secondary, custom_id="mdt_panel:mdt", row=0)
+    async def mdt_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not isinstance(interaction.user, discord.Member) or not _can_use_mdt(interaction.user):
+            await interaction.response.send_message("❌ هذه اللوحة مخصصة للضباط فقط.", ephemeral=True)
+            return
+        await interaction.response.send_modal(MDTModal())
+
+    @discord.ui.button(label="Vehicle Impound", style=discord.ButtonStyle.secondary, custom_id="mdt_panel:vehicle", row=0)
+    async def vehicle_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not isinstance(interaction.user, discord.Member) or not _can_use_mdt(interaction.user):
+            await interaction.response.send_message("❌ هذه اللوحة مخصصة للضباط فقط.", ephemeral=True)
+            return
+        await interaction.response.send_modal(VehicleImpoundModal())
+
+    @discord.ui.button(label="Suspect Statement", style=discord.ButtonStyle.secondary, custom_id="mdt_panel:statement", row=0)
+    async def statement_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not isinstance(interaction.user, discord.Member) or not _can_use_mdt(interaction.user):
+            await interaction.response.send_message("❌ هذه اللوحة مخصصة للضباط فقط.", ephemeral=True)
+            return
+        await interaction.response.send_modal(SuspectStatementModal())
+
+
+class RecordDeleteSelect(discord.ui.Select):
+    def __init__(self, records):
+        options = [
+            discord.SelectOption(
+                label=f"#{row[0]} - {RECORD_TYPE_LABELS.get(row[1], row[1])}"[:100],
+                description=(row[3][:100] if row[3] else None),
+                value=str(row[0]),
+            )
+            for row in records[:25]
+        ]
+        super().__init__(placeholder="اختر سجل لحذفه...", options=options, min_values=1, max_values=1)
+
+    async def callback(self, interaction: discord.Interaction):
+        if not isinstance(interaction.user, discord.Member) or not _can_manage_records(interaction.user):
+            await interaction.response.send_message("❌ حذف السوابق للأدمن فقط.", ephemeral=True)
+            return
+        record_id = int(self.values[0])
+        deleted = await db.delete_mdt_record(record_id)
+        if deleted and interaction.guild:
+            await utils.send_log(
+                interaction.guild, "MDT Record Deleted",
+                f"المنفذ: {interaction.user.mention}\nرقم السجل: {record_id}",
+            )
+        await interaction.response.send_message(
+            "✅ تم حذف السجل." if deleted else "⚠️ ما تم العثور على السجل.",
             ephemeral=True,
         )
+
+
+class RecordDeleteView(discord.ui.View):
+    def __init__(self, records):
+        super().__init__(timeout=180)
+        if records:
+            self.add_item(RecordDeleteSelect(records))
 
 
 class RecordCheckPanelView(discord.ui.View):
@@ -368,16 +348,12 @@ class RecordCheckPanelView(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(label="Check Record", style=discord.ButtonStyle.secondary, custom_id="mdt_panel:record_check")
-    async def check_button(self, interaction, button):
+    async def check_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         if not isinstance(interaction.user, discord.Member) or not _can_use_mdt(interaction.user):
             await interaction.response.send_message("❌ هذه اللوحة مخصصة للضباط فقط.", ephemeral=True)
             return
         await interaction.response.send_modal(RecordCheckModal())
 
-
-# ==========================================================
-#   Cog
-# ==========================================================
 
 class MDT(commands.Cog):
     def __init__(self, bot):
@@ -390,7 +366,13 @@ class MDT(commands.Cog):
         statement_channel="القناة اللي تستقبل أقوال المتهمين",
     )
     @app_commands.default_permissions(administrator=True)
-    async def mdt_panel(self, interaction, mdt_channel, vehicle_channel, statement_channel):
+    async def mdt_panel(
+        self,
+        interaction: discord.Interaction,
+        mdt_channel: discord.TextChannel,
+        vehicle_channel: discord.TextChannel,
+        statement_channel: discord.TextChannel,
+    ):
         if not isinstance(interaction.user, discord.Member) or not _can_manage_records(interaction.user):
             await interaction.response.send_message("❌ لا تملك صلاحية استخدام هذا الأمر.", ephemeral=True)
             return
@@ -430,7 +412,7 @@ class MDT(commands.Cog):
 
     @app_commands.command(name="record-check-panel", description="نشر لوحة فحص/حذف السوابق في القناة الحالية")
     @app_commands.default_permissions(administrator=True)
-    async def record_check_panel(self, interaction):
+    async def record_check_panel(self, interaction: discord.Interaction):
         if not isinstance(interaction.user, discord.Member) or not _can_manage_records(interaction.user):
             await interaction.response.send_message("❌ لا تملك صلاحية استخدام هذا الأمر.", ephemeral=True)
             return
