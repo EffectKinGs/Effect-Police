@@ -248,14 +248,14 @@ class RecordCheckModal(discord.ui.Modal, title="𝗥𝗲𝗰𝗼𝗿𝗱 𝗖�
             type_label = RECORD_TYPE_LABELS.get(record_type, record_type)
 
             container.add_item(discord.ui.TextDisplay(
-                f"<:emoji_13:1550308496216432781>︲{type_label} #{record_id}"
+                f"**<:emoji_13:1550308496216432781>︲{type_label} #{record_id}**"
             ))
 
             if summary:
                 container.add_item(discord.ui.TextDisplay(summary))
 
             container.add_item(discord.ui.TextDisplay(
-                f"-# **<:emoji_38:1550334422274801664>︲Mention the official : ** {officer_text}\n"
+                f"-# **<:emoji_38:1550334422274801664>︲Mention The Official : ** {officer_text}\n"
                 f"-# <:emoji_10:1550308354759327835>︲Registered For : <t:{created_at}:R> **"
             ))
 
@@ -340,7 +340,7 @@ class RecordDeleteSelect(discord.ui.Select):
                 f"المنفذ: {interaction.user.mention}\nرقم السجل: {record_id}",
             )
         await interaction.response.send_message(
-            "✅ تم حذف السجل." if deleted else "⚠️ ما تم العثور على السجل.",
+            "<:emoji_12:1550308402520133632> ' تم حذف السجل." if deleted else "⚠️ ما تم العثور على السجل.",
             ephemeral=True,
         )
 
