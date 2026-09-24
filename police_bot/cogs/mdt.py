@@ -233,27 +233,40 @@ class RecordCheckModal(discord.ui.Modal, title="𝗥𝗲𝗰𝗼𝗿𝗱 𝗖�
             )
             return
 
-        for row in records[:10]:
+        view = discord.ui.LayoutView(timeout=None)
+        container = discord.ui.Container(accent_color=discord.Color(ACCENT))
+
+        container.add_item(discord.ui.TextDisplay(
+            f"# <:emoji_5:1550307911115218974>︲Record Check ( {character_id} )"
+        ))
+        container.add_item(discord.ui.Separator())
+
+        for i, row in enumerate(records[:10]):
             record_id, record_type, officer_id, summary, created_at = row
             officer = interaction.guild.get_member(officer_id)
             officer_text = officer.mention if officer else f"`{officer_id}`"
+            type_label = RECORD_TYPE_LABELS.get(record_type, record_type)
 
-            view = discord.ui.LayoutView(timeout=None)
-            container = discord.ui.Container(accent_color=discord.Color(ACCENT))
-            container.add_item(discord.ui.TextDisplay(f"# <:emoji_5:1550307911115218974>︲Record Check ( {character_id} )"))
-            container.add_item(discord.ui.Separator())
             container.add_item(discord.ui.TextDisplay(
-                f"**<:emoji_13:1550308496216432781>︲{RECORD_TYPE_LABELS.get(record_type, record_type)} #{record_id}**\n"
-                f"{summary or '—'}"
+                f"<:emoji_13:1550308496216432781>︲{type_label} #{record_id}"
             ))
-            container.add_item(discord.ui.Separator())
+
+            if summary:
+                container.add_item(discord.ui.TextDisplay(summary))
+
             container.add_item(discord.ui.TextDisplay(
-                f"-# **<:emoji_38:1550334422274801664>︲Mention the official :** {officer_text}\n"
-                f"-# <:emoji_10:1550308354759327835>︲Registered For : <t:{created_at}:R>"
+                f"-# **<:emoji_38:1550334422274801664>︲Mention the official : ** {officer_text}\n"
+                f"-# <:emoji_10:1550308354759327835>︲Registered For : <t:{created_at}:R> **"
             ))
-            container.add_item(discord.ui.TextDisplay("-# System Police Effect ."))
-            view.add_item(container)
-            await interaction.followup.send(view=view, ephemeral=True)
+
+            if i < len(records[:10]) - 1:
+                container.add_item(discord.ui.Separator())
+
+        container.add_item(discord.ui.Separator())
+        container.add_item(discord.ui.TextDisplay("-# System Police Effect ."))
+
+        view.add_item(container)
+        await interaction.followup.send(view=view, ephemeral=True)
 
         if _can_manage_records(interaction.user):
             await interaction.followup.send(
