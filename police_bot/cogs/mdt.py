@@ -14,6 +14,8 @@ RECORD_TYPE_LABELS = {
     "suspect_statement": "Suspect Statement",
 }
 
+ACCENT = 0x01FFFE
+
 
 def _channel_key(record_type: str, guild_id: int) -> str:
     return f"mdt_{record_type}_channel_id:{guild_id}"
@@ -27,74 +29,74 @@ async def _get_target_channel(guild: discord.Guild, record_type: str):
     return channel if isinstance(channel, discord.TextChannel) else None
 
 
-def _mdt_embed(admin_mention, character_id, suspect_name, charge, fine, image_link):
-    embed = discord.Embed(
+def _build_record_view(*, title: str, fields: list[tuple[str, str]], image_link: str | None) -> discord.ui.LayoutView:
+    view = discord.ui.LayoutView(timeout=None)
+    container = discord.ui.Container(accent_color=discord.Color(ACCENT))
+
+    container.add_item(discord.ui.TextDisplay(f"# {title}"))
+    container.add_item(discord.ui.Separator())
+
+    body = "\n".join(f"**{label}** {value}" for label, value in fields)
+    container.add_item(discord.ui.TextDisplay(body))
+
+    clean_link = (image_link or "").strip()
+    if clean_link.startswith(("http://", "https://")):
+        container.add_item(discord.ui.Separator())
+        gallery = discord.ui.MediaGallery()
+        gallery.add_item(media=clean_link)
+        container.add_item(gallery)
+
+    container.add_item(discord.ui.Separator())
+    container.add_item(discord.ui.TextDisplay("-# System Police Effect ."))
+
+    view.add_item(container)
+    return view
+
+
+def _mdt_view(admin_mention, character_id, suspect_name, charge, fine, image_link):
+    return _build_record_view(
         title="<:emoji_45:1550961724331397231> ︲ MDT Record",
-        color=discord.Color.from_str("#01FFFE"),
+        fields=[
+            ("1 - <:emoji_38:1550334422274801664>︲Mention the official :", admin_mention),
+            ("2 - <:emoji_13:1550308496216432781>︲Id Character :", character_id),
+            ("3 - <:emoji_9:1550308305014882344>︲Suspect Name :", suspect_name),
+            ("4 - <:emoji_14:1550308740551417956>︲Person’s Charge :", charge),
+            ("5 - <:emoji_14:1550308636214169610>︲Financial Fine :", fine),
+        ],
+        image_link=image_link,
     )
-    embed.add_field(
-        name="\u200b",
-        value=(
-            f"**1 - <:emoji_38:1550334422274801664>︲Mention the official : ** {admin_mention}\n"
-            f"**2 - <:emoji_13:1550308496216432781>︲Id Character : ** {character_id}\n"
-            f"**3 - <:emoji_9:1550308305014882344>︲Suspect Name : ** {suspect_name}\n"
-            f"**4 - <:emoji_14:1550308740551417956>︲Person’s Charge : ** {charge}\n"
-            f"**5 - <:emoji_14:1550308636214169610>︲Financial Fine : ** {fine}"
-        ),
-        inline=False,
-    )
-    if image_link:
-        embed.set_image(url=image_link)
-    embed.set_footer(text="System Police Effect .")
-    return embed
 
 
-def _vehicle_impound_embed(admin_mention, character_id, suspect_name, vehicle_type, plate, charge, image_link):
-    embed = discord.Embed(
+def _vehicle_impound_view(admin_mention, character_id, suspect_name, vehicle_type, plate, charge, image_link):
+    return _build_record_view(
         title="<:emoji_45:1550961724331397231> ︲ Vehicle Impound",
-        color=discord.Color.from_str("#01FFFE"),
+        fields=[
+            ("1 - <:emoji_38:1550334422274801664>︲Mention the official :", admin_mention),
+            ("2 - <:emoji_13:1550308496216432781>︲Id Character :", character_id),
+            ("3 - <:emoji_9:1550308305014882344>︲Suspect Name :", suspect_name),
+            ("4 - <:emoji_131:1551326444565831813>︲Offending Vehicle Type :", vehicle_type),
+            ("5 - <:emoji_39:1550337741936394380>︲Vehicle Plate Number :", plate),
+            ("6 - <:FaLcoN:1551327269493153887>︲Recorded Charge :", charge),
+        ],
+        image_link=image_link,
     )
-    embed.add_field(
-        name="\u200b",
-        value=(
-            f"**1 - <:emoji_38:1550334422274801664>︲Mention the official : ** {admin_mention}\n"
-            f"**2 - <:emoji_13:1550308496216432781>︲Id Character : ** {character_id}\n"
-            f"**3 - <:emoji_9:1550308305014882344>︲Suspect Name : ** {suspect_name}\n"
-            f"**4 - <:emoji_131:1551326444565831813>︲Offending Vehicle Type : ** {vehicle_type}\n"
-            f"**5 - <:emoji_39:1550337741936394380>︲Vehicle Plate Number : ** {plate}\n"
-            f"**6 - <:FaLcoN:1551327269493153887>︲Recorded Charge : ** {charge}"
-        ),
-        inline=False,
-    )
-    if image_link:
-        embed.set_image(url=image_link)
-    embed.set_footer(text="System Police Effect .")
-    return embed
 
 
-def _suspect_statement_embed(admin_mention, character_id, suspect_name, case, justification, image_link):
-    embed = discord.Embed(
+def _suspect_statement_view(admin_mention, character_id, suspect_name, case, justification, image_link):
+    return _build_record_view(
         title="<:emoji_45:1550961724331397231> ︲ Suspect Statement",
-        color=discord.Color.from_str("#01FFFE"),
+        fields=[
+            ("1 - <:emoji_38:1550334422274801664>︲Mention the official :", admin_mention),
+            ("2 - <:emoji_13:1550308496216432781>︲Id Character :", character_id),
+            ("3 - <:emoji_9:1550308305014882344>︲Suspect Name :", suspect_name),
+            ("4 - <:emoji_7:1550308237119885437>︲Defendant’s Case :", case),
+            ("5 - <:emoji_30:1550311848369782905>︲Defendant’s Justifications :", justification),
+        ],
+        image_link=image_link,
     )
-    embed.add_field(
-        name="\u200b",
-        value=(
-            f"**1 - <:emoji_38:1550334422274801664>︲Mention the official : ** {admin_mention}\n"
-            f"**2 - <:emoji_13:1550308496216432781>︲Id Character : ** {character_id}\n"
-            f"**3 - <:emoji_9:1550308305014882344>︲Suspect Name : ** {suspect_name}\n"
-            f"**4 - <:emoji_7:1550308237119885437>︲Defendant’s Case : ** {case}\n"
-            f"**5 - <:emoji_30:1550311848369782905>︲Defendant’s Justifications : ** {justification}"
-        ),
-        inline=False,
-    )
-    if image_link:
-        embed.set_image(url=image_link)
-    embed.set_footer(text="System Police Effect .")
-    return embed
 
 
-async def _finalize(interaction: discord.Interaction, *, record_type, character_id, summary, embed, points):
+async def _finalize(interaction: discord.Interaction, *, record_type, character_id, summary, view: discord.ui.LayoutView, points):
     channel = await _get_target_channel(interaction.guild, record_type)
     if channel is None:
         await interaction.followup.send(
@@ -104,7 +106,7 @@ async def _finalize(interaction: discord.Interaction, *, record_type, character_
         return
 
     try:
-        await channel.send(embed=embed)
+        await channel.send(view=view)
     except (discord.Forbidden, discord.HTTPException):
         await interaction.followup.send("⚠️ تعذر الإرسال لقناة الاستقبال.", ephemeral=True)
         return
@@ -134,7 +136,7 @@ class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
             return
         await interaction.response.defer(ephemeral=True)
 
-        embed = _mdt_embed(
+        view = _mdt_view(
             interaction.user.mention,
             str(self.character_id).strip(),
             str(self.suspect_name).strip(),
@@ -146,7 +148,7 @@ class MDTModal(discord.ui.Modal, title="𝗠𝗗𝗧"):
         await _finalize(
             interaction, record_type="mdt",
             character_id=str(self.character_id).strip(),
-            summary=summary, embed=embed, points=config.MDT_POINTS,
+            summary=summary, view=view, points=config.MDT_POINTS,
         )
 
 
@@ -164,7 +166,7 @@ class VehicleImpoundModal(discord.ui.Modal, title="𝗩𝗲𝗵𝗶𝗰𝗹𝗲 
             return
         await interaction.response.defer(ephemeral=True)
 
-        embed = _vehicle_impound_embed(
+        view = _vehicle_impound_view(
             interaction.user.mention,
             str(self.character_id).strip(),
             str(self.suspect_name).strip(),
@@ -177,7 +179,7 @@ class VehicleImpoundModal(discord.ui.Modal, title="𝗩𝗲𝗵𝗶𝗰𝗹𝗲 
         await _finalize(
             interaction, record_type="vehicle_impound",
             character_id=str(self.character_id).strip(),
-            summary=summary, embed=embed, points=config.VEHICLE_IMPOUND_POINTS,
+            summary=summary, view=view, points=config.VEHICLE_IMPOUND_POINTS,
         )
 
 
@@ -197,7 +199,7 @@ class SuspectStatementModal(discord.ui.Modal, title="𝗦𝘂𝘀𝗽𝗲𝗰�
             return
         await interaction.response.defer(ephemeral=True)
 
-        embed = _suspect_statement_embed(
+        view = _suspect_statement_view(
             interaction.user.mention,
             str(self.character_id).strip(),
             str(self.suspect_name).strip(),
@@ -209,7 +211,7 @@ class SuspectStatementModal(discord.ui.Modal, title="𝗦𝘂𝘀𝗽𝗲𝗰�
         await _finalize(
             interaction, record_type="suspect_statement",
             character_id=str(self.character_id).strip(),
-            summary=summary, embed=embed, points=config.SUSPECT_STATEMENT_POINTS,
+            summary=summary, view=view, points=config.SUSPECT_STATEMENT_POINTS,
         )
 
 
@@ -231,33 +233,27 @@ class RecordCheckModal(discord.ui.Modal, title="𝗥𝗲𝗰𝗼𝗿𝗱 𝗖�
             )
             return
 
-        embeds = []
         for row in records[:10]:
             record_id, record_type, officer_id, summary, created_at = row
             officer = interaction.guild.get_member(officer_id)
             officer_text = officer.mention if officer else f"`{officer_id}`"
 
-            e = discord.Embed(
-                title=f"<:emoji_5:1550307911115218974>︲Record Check ( {character_id} )",
-                color=discord.Color.from_str("#01FFFE"),
-            )
-            e.add_field(
-                name=f"<:emoji_13:1550308496216432781>︲{RECORD_TYPE_LABELS.get(record_type, record_type)} #{record_id}",
-                value=summary or "—",
-                inline=False,
-            )
-            e.add_field(
-                name="\u200b",
-                value=(
-                    f"-# **<:emoji_38:1550334422274801664>︲Mention the official : ** {officer_text}\n"
-                    f"-# <:emoji_10:1550308354759327835>︲Registered For : <t:{created_at}:R> **"
-                ),
-                inline=False,
-            )
-            e.set_footer(text="System Police Effect .")
-            embeds.append(e)
-
-        await interaction.followup.send(embeds=embeds, ephemeral=True)
+            view = discord.ui.LayoutView(timeout=None)
+            container = discord.ui.Container(accent_color=discord.Color(ACCENT))
+            container.add_item(discord.ui.TextDisplay(f"# <:emoji_5:1550307911115218974>︲Record Check ( {character_id} )"))
+            container.add_item(discord.ui.Separator())
+            container.add_item(discord.ui.TextDisplay(
+                f"**<:emoji_13:1550308496216432781>︲{RECORD_TYPE_LABELS.get(record_type, record_type)} #{record_id}**\n"
+                f"{summary or '—'}"
+            ))
+            container.add_item(discord.ui.Separator())
+            container.add_item(discord.ui.TextDisplay(
+                f"-# **<:emoji_38:1550334422274801664>︲Mention the official :** {officer_text}\n"
+                f"-# <:emoji_10:1550308354759327835>︲Registered For : <t:{created_at}:R>"
+            ))
+            container.add_item(discord.ui.TextDisplay("-# System Police Effect ."))
+            view.add_item(container)
+            await interaction.followup.send(view=view, ephemeral=True)
 
         if _can_manage_records(interaction.user):
             await interaction.followup.send(
