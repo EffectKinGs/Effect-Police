@@ -34,7 +34,7 @@ def _format_experience(experience: str) -> str:
     return "\n".join(f"{_EXPERIENCE_EMOJI} {line}" for line in lines)
 
 
-def _build_application_layout(applicant: discord.Member, name: str, age: str, experience: str) -> discord.ui.LayoutView:
+def _build_application_container(applicant: discord.Member, name: str, age: str, experience: str) -> discord.ui.Container:
     container = discord.ui.Container(accent_color=config.EMBED_COLOR)
     container.add_item(discord.ui.TextDisplay(f"|| <@&1511976724240535704> || {applicant.mention}"))
     container.add_item(discord.ui.Separator())
@@ -51,90 +51,46 @@ def _build_application_layout(applicant: discord.Member, name: str, age: str, ex
         f"{_format_experience(experience)}"
         "**"
     ))
-    layout = discord.ui.LayoutView(timeout=None)
-    layout.add_item(container)
-    layout.add_item(discord.ui.ActionRow(
-        discord.ui.Button(label="Accept", style=discord.ButtonStyle.success, custom_id="submits:accept"),
-        discord.ui.Button(label="Reject", style=discord.ButtonStyle.danger, custom_id="submits:reject"),
-    ))
-    return layout
+    return container
 
 
-class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( 𝗦𝘂𝗯𝗺𝗶𝘁𝘀 )"):
-    def __init__(self):
-        super().__init__()
-        self.character_name = discord.ui.TextInput(placeholder="", required=True, max_length=80)
-        self.character_age = discord.ui.TextInput(placeholder="", required=True, max_length=3)
-        self.experience = discord.ui.TextInput(
-            placeholder="", required=True, max_length=1000, style=discord.TextStyle.paragraph,
-        )
-        self.add_item(discord.ui.Label(text="Character Name / اسم الكركتر", component=self.character_name))
-        self.add_item(discord.ui.Label(text="Character Age / عمر الكركتر", component=self.character_age))
-        self.add_item(discord.ui.Label(text="Your Experience / خبراتك", component=self.experience))
-
-    async def on_submit(self, interaction: discord.Interaction):
-        if interaction.guild is None or not isinstance(interaction.channel, discord.TextChannel):
-            await interaction.response.send_message("هذه اللوحة تعمل داخل السيرفر فقط.", ephemeral=True)
-            return
-
-        name = str(self.character_name).strip()
-        age = str(self.character_age).strip()
-        experience = str(self.experience).strip()
-        if not all((name, age, experience)):
-            await interaction.response.send_message("يلزم تعبئة جميع الحقول.", ephemeral=True)
-            return
-
-        await interaction.response.defer(ephemeral=True)
-
-        layout = _build_application_layout(interaction.user, name, age, experience)
-        target_channel = await _get_review_channel(interaction.guild) or interaction.channel
-
-        try:
-            await target_channel.send(
-                view=layout,
-                allowed_mentions=discord.AllowedMentions(users=True, roles=True),
-            )
-        except Exception as exc:
-            await interaction.followup.send(f"ERROR: {type(exc).__name__}: {exc}", ephemeral=True)
-            return
-
-        pending_role = interaction.guild.get_role(config.SUBMISSION_PENDING_ROLE_ID)
-        if pending_role is not None and isinstance(interaction.user, discord.Member):
-            try:
-                await interaction.user.add_roles(pending_role, reason="Military application submitted")
-            except discord.Forbidden:
-                pass
-
-        await interaction.followup.send("**<:emoji_12:1550308402520133632> ︲ Your Application Has Been Submitted. Please Be Patient . **", ephemeral=True)
-
-
-class SubmissionReviewView(discord.ui.View):
-    def __init__(self):
+class SubmissionReviewView(discord.ui.LayoutView):
+    def __init__(self, applicant: discord.Member, name: str, age: str, experience: str):
         super().__init__(timeout=None)
+        self.applicant_id = applicant.id
 
-    @staticmethod
-    def _extract_applicant_id(message: discord.Message) -> int | None:
-        match = _MENTION_RE.search(message.content or "")
-        return int(match.group(1)) if match else None
+        accept_button = discord.ui.Button(label="Accept", style=discord.ButtonStyle.success, custom_id=f"submits:accept:{applicant.id}")
+        reject_button = discord.ui.Button(label="Reject", style=discord.ButtonStyle.danger, custom_id=f"submits:reject:{applicant.id}")
+        accept_button.callback = self._accept
+        reject_button.callback = self._reject
+
+        self.add_item(_build_application_container(applicant, name, age, experience))
+        self.add_item(discord.ui.ActionRow(accept_button, reject_button))
+
+    async def _accept(self, interaction: discord.Interaction):
+        await self._resolve(interaction, accepted=True)
+
+    async def _reject(self, interaction: discord.Interaction):
+        await self._resolve(interaction, accepted=False)
 
     async def _resolve(self, interaction: discord.Interaction, *, accepted: bool):
         if interaction.guild is None or not isinstance(interaction.user, discord.Member) or not _can_review(interaction.user):
             await interaction.response.send_message("❌ هذه اللوحة للمسؤولين فقط.", ephemeral=True)
             return
 
-        applicant_id = self._extract_applicant_id(interaction.message)
-        applicant: discord.Member | None = None
-        if applicant_id is not None:
-            applicant = interaction.guild.get_member(applicant_id)
-            if applicant is None:
-                try:
-                    applicant = await interaction.guild.fetch_member(applicant_id)
-                except (discord.NotFound, discord.HTTPException):
-                    applicant = None
+        applicant: discord.Member | None = interaction.guild.get_member(self.applicant_id)
+        if applicant is None:
+            try:
+                applicant = await interaction.guild.fetch_member(self.applicant_id)
+            except (discord.NotFound, discord.HTTPException):
+                applicant = None
 
         await interaction.response.defer()
-        for child in self.children:
-            child.disabled = True
+        for row in self.children:
+            if isinstance(row, discord.ui.ActionRow):
+                for button in row.children:
+                    if isinstance(button, discord.ui.Button):
+                        button.disabled = True
         try:
             await interaction.message.edit(view=self)
         except discord.HTTPException:
@@ -186,17 +142,57 @@ class SubmissionReviewView(discord.ui.View):
             interaction.guild,
             "Military Application Reviewed",
             f"المُراجع: {interaction.user.mention}\n"
-            f"مقدم الطلب: {applicant.mention if applicant else (applicant_id or '—')}\n"
+            f"مقدم الطلب: {applicant.mention if applicant else (self.applicant_id or '—')}\n"
             f"النتيجة: {'قبول' if accepted else 'رفض'}",
         )
 
-    @discord.ui.button(label="Accept", style=discord.ButtonStyle.success, custom_id="submits:accept")
-    async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await self._resolve(interaction, accepted=True)
 
-    @discord.ui.button(label="Reject", style=discord.ButtonStyle.danger, custom_id="submits:reject")
-    async def reject(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await self._resolve(interaction, accepted=False)
+class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( 𝗦𝘂𝗯𝗺𝗶𝘁𝘀 )"):
+    def __init__(self):
+        super().__init__()
+        self.character_name = discord.ui.TextInput(placeholder="", required=True, max_length=80)
+        self.character_age = discord.ui.TextInput(placeholder="", required=True, max_length=3)
+        self.experience = discord.ui.TextInput(
+            placeholder="", required=True, max_length=1000, style=discord.TextStyle.paragraph,
+        )
+        self.add_item(discord.ui.Label(text="Character Name / اسم الكركتر", component=self.character_name))
+        self.add_item(discord.ui.Label(text="Character Age / عمر الكركتر", component=self.character_age))
+        self.add_item(discord.ui.Label(text="Your Experience / خبراتك", component=self.experience))
+
+    async def on_submit(self, interaction: discord.Interaction):
+        if interaction.guild is None or not isinstance(interaction.channel, discord.TextChannel):
+            await interaction.response.send_message("هذه اللوحة تعمل داخل السيرفر فقط.", ephemeral=True)
+            return
+
+        name = str(self.character_name).strip()
+        age = str(self.character_age).strip()
+        experience = str(self.experience).strip()
+        if not all((name, age, experience)):
+            await interaction.response.send_message("يلزم تعبئة جميع الحقول.", ephemeral=True)
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        review_view = SubmissionReviewView(interaction.user, name, age, experience)
+        target_channel = await _get_review_channel(interaction.guild) or interaction.channel
+
+        try:
+            await target_channel.send(
+                view=review_view,
+                allowed_mentions=discord.AllowedMentions(users=True, roles=True),
+            )
+        except Exception as exc:
+            await interaction.followup.send(f"ERROR: {type(exc).__name__}: {exc}", ephemeral=True)
+            return
+
+        pending_role = interaction.guild.get_role(config.SUBMISSION_PENDING_ROLE_ID)
+        if pending_role is not None and isinstance(interaction.user, discord.Member):
+            try:
+                await interaction.user.add_roles(pending_role, reason="Military application submitted")
+            except discord.Forbidden:
+                pass
+
+        await interaction.followup.send("**<:emoji_12:1550308402520133632> ︲ Your Application Has Been Submitted. Please Be Patient . **", ephemeral=True)
 
 
 class SubmissionPanelView(discord.ui.View):
