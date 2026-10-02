@@ -26,6 +26,35 @@ async def _get_review_channel(guild: discord.Guild) -> discord.TextChannel | Non
     return channel if isinstance(channel, discord.TextChannel) else None
 
 
+def _build_application_layout(name: str, age: str, experience: str, image_url: str | None) -> discord.ui.LayoutView:
+    container = discord.ui.Container(accent_color=config.EMBED_COLOR)
+    container.add_item(discord.ui.TextDisplay("# <:emoji_39:1550337741936394380>︲OLd KInG Police ( SuBmits )"))
+    container.add_item(discord.ui.Separator())
+    container.add_item(discord.ui.TextDisplay(
+        "**"
+        "<:emoji_9:1550308305014882344>︲NaME :\n"
+        "-# Name / الاسم\n"
+        f"{name}\n"
+        "<:emoji_13:1550308496216432781>︲AGE :\n"
+        "-# Age / العمر\n"
+        f"{age}\n"
+        "<:emoji_27:1550309790163664906>︲ExperiEnce :\n"
+        "-# Experience / الخبرات .\n"
+        f"{experience}"
+        "**"
+    ))
+    if image_url:
+        container.add_item(discord.ui.Separator())
+        container.add_item(discord.ui.MediaGallery(discord.MediaGalleryItem(media=image_url)))
+    layout = discord.ui.LayoutView(timeout=None)
+    layout.add_item(container)
+    layout.add_item(discord.ui.ActionRow(
+        discord.ui.Button(label="Accept", style=discord.ButtonStyle.success, custom_id="submits:accept"),
+        discord.ui.Button(label="Reject", style=discord.ButtonStyle.danger, custom_id="submits:reject"),
+    ))
+    return layout
+
+
 class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( 𝗦𝘂𝗯𝗺𝗶𝘁𝘀 )"):
     def __init__(self):
         super().__init__()
@@ -52,24 +81,15 @@ class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( �
 
         await interaction.response.defer(ephemeral=True)
 
-        description = (
-            "**\n"
-            "<:emoji_15:1550308794297356388> - New Military Application **\n"
-            "**\n"
-            f"<:emoji_9:1550308305014882344> ︲ Name : {name}\n"
-            f"<:emoji_13:1550308496216432781> ︲Age : {age}\n"
-            f"<:emoji_27:1550309790163664906> ︲ Experience : {experience}\n"
-            "**"
-        )
-        embed = utils.base_embed("<:emoji_39:1550337741936394380> ︲ Effect Police ( SuBmits )", description, image_url="")
+        image_url = interaction.user.display_avatar.url
+        layout = _build_application_layout(name, age, experience, image_url)
         target_channel = await _get_review_channel(interaction.guild) or interaction.channel
 
         try:
             await target_channel.send(
                 content=f"|| <@&1511976724240535704> || {interaction.user.mention}",
-                embed=embed,
-                view=SubmissionReviewView(),
-                allowed_mentions=discord.AllowedMentions(users=True),
+                view=layout,
+                allowed_mentions=discord.AllowedMentions(users=True, roles=True),
             )
         except (discord.Forbidden, discord.HTTPException):
             await interaction.followup.send(" تعذر إرسال طلبك، حاول لاحقًا.", ephemeral=True)
@@ -147,6 +167,16 @@ class SubmissionReviewView(discord.ui.View):
                 "-# **<a:MTRP:1394920520134426636> - و مُتمنين لك التوفيق في المرات المُقبلة . **"
             )
             result_embed = utils.base_embed("Reject", description, image_url="")
+
+        if applicant is not None:
+            try:
+                await applicant.send(embed=result_embed)
+            except (discord.Forbidden, discord.HTTPException):
+                await interaction.followup.send(
+                    f"⚠️ تعذر إرسال الخاص إلى {applicant.mention} (الخاص مقفل).",
+                    ephemeral=True,
+                )
+
         await utils.send_log_embed(interaction.guild, result_embed)
 
         await utils.send_log(
