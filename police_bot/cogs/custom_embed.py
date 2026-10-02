@@ -1,11 +1,35 @@
 from __future__ import annotations
 
+import re
+
 import discord
 from discord import app_commands
 from discord.ext import commands
 
 import config
 import utils
+
+
+def resolve_emojis(text: str, guild: discord.Guild) -> str:
+    if not text:
+        return text
+
+    def repl_simple(match):
+        name = match.group(1)
+        emoji = discord.utils.get(guild.emojis, name=name)
+        return str(emoji) if emoji else match.group(0)
+
+    text = re.sub(r"<:([a-zA-Z0-9_]+):>", repl_simple, text)
+    text = re.sub(r"(?<!\w):([a-zA-Z0-9_]+):(?!\w)", repl_simple, text)
+
+    def repl_full(match):
+        name, emoji_id = match.group(1), int(match.group(2))
+        emoji = discord.utils.get(guild.emojis, id=emoji_id, name=name)
+        return str(emoji) if emoji else match.group(0)
+
+    text = re.sub(r"<a?:([a-zA-Z0-9_]+):(\d+)>", repl_full, text)
+
+    return text
 
 
 class CreateEmbedModal(discord.ui.Modal, title="𝗖𝗿𝗲𝗮𝘁𝗲 𝗘𝗺𝗯𝗲𝗱"):
@@ -22,8 +46,8 @@ class CreateEmbedModal(discord.ui.Modal, title="𝗖𝗿𝗲𝗮𝘁𝗲 𝗘�
         if interaction.guild is None or not isinstance(interaction.channel, discord.TextChannel):
             await interaction.response.send_message("هذه اللوحة تعمل داخل السيرفر فقط.", ephemeral=True)
             return
-        title = str(self.embed_title).strip() or "‎"
-        description = str(self.embed_description).strip() or "‎"
+        title = resolve_emojis(str(self.embed_title).strip(), interaction.guild) or "‎"
+        description = resolve_emojis(str(self.embed_description).strip(), interaction.guild) or "‎"
         image_url = str(self.image_url).strip()
         embed = discord.Embed(title=title, description=description, color=config.EMBED_COLOR)
         embed.set_footer(text=config.EMBED_FOOTER)
