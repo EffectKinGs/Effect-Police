@@ -39,6 +39,7 @@ def _build_application_layout(applicant: discord.Member, name: str, age: str, ex
     container.add_item(discord.ui.TextDisplay(f"|| <@&1511976724240535704> || {applicant.mention}"))
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay("# <:emoji_39:1550337741936394380>︲OLd KInG Police ( SuBmits )"))
+    container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
         "**"
         f"<:emoji_9:1550308305014882344>︲NaME : {name}\n"
