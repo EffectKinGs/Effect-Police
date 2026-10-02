@@ -56,16 +56,16 @@ def _build_application_container(applicant: discord.Member, name: str, age: str,
 
 def _build_result_layout(accepted: bool) -> discord.ui.LayoutView:
     if accepted:
-        header = "# <a:emoji_41:1555519228046479441>︲Application Accepted ."
+        header = "# <:emoji_31:1550311895594963094>︲Application Accepted ."
         body = (
-            "**<a:MTRP:1550940537492865124> - ادارة شرطة اولد كنق تُبارك لك بقبولك . **\n"
-            "**<a:MTRP:1550940537492865124> - و مُتمنين لك التوفيق في التدريب العسكري القادم . **"
+            "-# **<:emoji_31:1550311895594963094> - ادارة شرطة اولد كنق تُبارك لك بقبولك . **\n"
+            "-# **<a:MTRP:1555504111011504138> - و مُتمنين لك التوفيق في التدريب العسكري القادم . **"
         )
         color = 0x57F287
     else:
         header = "# <a:emoji_41:1555519228046479441>︲Application Rejected ."
         body = (
-            "**<a:MTRP:1550940537492865124> - أدارة شرطة اولد كنق تود ابلاغك برفض طلبك **\n"
+            "-# **<:emoji_288:1382777303196631130> - أدارة شرطة اولد كنق تود ابلاغك برفض طلبك **\n"
             "-# **<a:MTRP:1550940537492865124> - و مُتمنين لك التوفيق في المرات المُقبلة . **"
         )
         color = 0xED4245
