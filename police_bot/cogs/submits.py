@@ -59,13 +59,13 @@ class SubmissionReviewView(discord.ui.LayoutView):
         super().__init__(timeout=None)
         self.applicant_id = applicant.id
 
-        accept_button = discord.ui.Button(label="Accept", style=discord.ButtonStyle.success, custom_id=f"submits:accept:{applicant.id}")
-        reject_button = discord.ui.Button(label="Reject", style=discord.ButtonStyle.danger, custom_id=f"submits:reject:{applicant.id}")
-        accept_button.callback = self._accept
-        reject_button.callback = self._reject
+        self.accept_button = discord.ui.Button(label="Accept", style=discord.ButtonStyle.success, custom_id=f"submits:accept:{applicant.id}")
+        self.reject_button = discord.ui.Button(label="Reject", style=discord.ButtonStyle.danger, custom_id=f"submits:reject:{applicant.id}")
+        self.accept_button.callback = self._accept
+        self.reject_button.callback = self._reject
 
         self.add_item(_build_application_container(applicant, name, age, experience))
-        self.add_item(discord.ui.ActionRow(accept_button, reject_button))
+        self.add_item(discord.ui.ActionRow(self.accept_button, self.reject_button))
 
     async def _accept(self, interaction: discord.Interaction):
         await self._resolve(interaction, accepted=True)
@@ -86,11 +86,9 @@ class SubmissionReviewView(discord.ui.LayoutView):
                 applicant = None
 
         await interaction.response.defer()
-        for row in self.children:
-            if isinstance(row, discord.ui.ActionRow):
-                for button in row.children:
-                    if isinstance(button, discord.ui.Button):
-                        button.disabled = True
+
+        self.accept_button.disabled = True
+        self.reject_button.disabled = True
         try:
             await interaction.message.edit(view=self)
         except discord.HTTPException:
