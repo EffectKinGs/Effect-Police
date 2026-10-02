@@ -42,16 +42,42 @@ def _build_application_container(applicant: discord.Member, name: str, age: str,
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
         "**"
-        f"<:emoji_9:1550308305014882344>︲NaME : {name}\n ."
+        f"<:emoji_9:1550308305014882344>︲NaME : {name}\n"
         "-# Name / الاسم .\n"
-        f"<:emoji_13:1550308496216432781>︲AGE : {age}\n ."
+        f"<:emoji_13:1550308496216432781>︲AGE : {age}\n"
         "-# Age / العمر .\n"
-        "<:emoji_27:1550309790163664906>︲ExperiEnce :\n ."
+        "<:emoji_27:1550309790163664906>︲ExperiEnce :\n"
         "-# Experience / الخبرات .\n"
         f"{_format_experience(experience)}"
         "**"
     ))
     return container
+
+
+def _build_result_layout(accepted: bool) -> discord.ui.LayoutView:
+    if accepted:
+        header = "# <a:emoji_41:1555519228046479441>︲Application Accepted ."
+        body = (
+            "**<a:MTRP:1550940537492865124> - ادارة شرطة اولد كنق تُبارك لك بقبولك . **\n"
+            "**<a:MTRP:1550940537492865124> - و مُتمنين لك التوفيق في التدريب العسكري القادم . **"
+        )
+        color = 0x57F287
+    else:
+        header = "# <a:emoji_41:1555519228046479441>︲Application Rejected ."
+        body = (
+            "**<a:MTRP:1550940537492865124> - أدارة شرطة اولد كنق تود ابلاغك برفض طلبك **\n"
+            "-# **<a:MTRP:1550940537492865124> - و مُتمنين لك التوفيق في المرات المُقبلة . **"
+        )
+        color = 0xED4245
+
+    container = discord.ui.Container(accent_color=color)
+    container.add_item(discord.ui.TextDisplay(header))
+    container.add_item(discord.ui.Separator())
+    container.add_item(discord.ui.TextDisplay(body))
+
+    layout = discord.ui.LayoutView(timeout=None)
+    layout.add_item(container)
+    return layout
 
 
 class SubmissionReviewView(discord.ui.LayoutView):
@@ -112,29 +138,21 @@ class SubmissionReviewView(discord.ui.LayoutView):
 
         await interaction.followup.send(status_line)
 
-        if accepted:
-            description = (
-                "** <a:MTRP:1550940537492865124> - ادارة شرطة اولد كنق تُبارك لك بقبولك . **\n"
-                "** <a:MTRP:1550940537492865124> - و مُتمنين لك التوفيق في التدريب العسكري القادم . **"
-            )
-            result_embed = utils.base_embed("Accept", description, image_url="")
-        else:
-            description = (
-                "   **<a:MTRP:1550940537492865124> - أدارة شرطة اولد كنق تود ابلاغك برفض طلبك **\n"
-                "-# **<a:MTRP:1550940537492865124> - و مُتمنين لك التوفيق في المرات المُقبلة . **"
-            )
-            result_embed = utils.base_embed("Reject", description, image_url="")
+        result_layout = _build_result_layout(accepted)
 
         if applicant is not None:
             try:
-                await applicant.send(embed=result_embed)
+                await applicant.send(view=result_layout)
             except (discord.Forbidden, discord.HTTPException):
                 await interaction.followup.send(
                     f"⚠️ تعذر إرسال الخاص إلى {applicant.mention} (الخاص مقفل).",
                     ephemeral=True,
                 )
 
-        await utils.send_log_embed(interaction.guild, result_embed)
+        try:
+            await utils.send_log_embed(interaction.guild, result_layout)
+        except Exception:
+            pass
 
         await utils.send_log(
             interaction.guild,
