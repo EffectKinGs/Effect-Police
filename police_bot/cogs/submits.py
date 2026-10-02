@@ -147,7 +147,7 @@ class SubmissionReviewView(discord.ui.LayoutView):
         )
 
 
-class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( 𝗦𝘂𝗯𝗺𝗶𝘁𝘀 )"):
+class SubmitModal(discord.ui.Modal, title="OLD KInG's ( 𝗦𝘂𝗯𝗺𝗶𝘁𝘀 )"):
     def __init__(self):
         super().__init__()
         self.character_name = discord.ui.TextInput(placeholder="", required=True, max_length=80)
@@ -192,7 +192,7 @@ class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( �
             except discord.Forbidden:
                 pass
 
-        await interaction.followup.send("**<:emoji_12:1550308402520133632> ︲ Your Application Has Been Submitted. Please Be Patient . **", ephemeral=True)
+        await interaction.followup.send("**<:emoji_12:1550308402520133632>︲Your Application Has Been Submitted. Please Be Patient . **", ephemeral=True)
 
 
 class SubmissionPanelView(discord.ui.View):
@@ -224,11 +224,11 @@ class Submits(commands.Cog):
             await db.set_setting(_REVIEW_CHANNEL_KEY.format(guild_id=interaction.guild.id), str(review_channel.id))
 
         description = (
-            "**<:emoji_5:1550307911115218974> - Welcome To The OLD KiNG's Police Department Application "
+            "**<:emoji_288:1555520227939188786> - Welcome To The OLD KiNG's Police Department Application "
             "Division, Where You Can Serve And Protect Your Nation While Leaving Your Mark Within Its Ranks .**"
         )
         embed = utils.base_embed(
-            "# <:emoji_39:1550337741936394380>︲OLd KInG Police ( SuBmits )",
+            "# <:emoji_39:1550337741936394380>︲OLd KInG (SuBmits)",
             description,
             image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
         )
