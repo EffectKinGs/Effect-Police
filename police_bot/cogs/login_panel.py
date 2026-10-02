@@ -52,12 +52,12 @@ async def build_duty_embed(guild: discord.Guild) -> discord.Embed:
     rows = await db.get_active_sessions(guild.id)
     count = len(rows)
     description = [
-        f"** <:emoji_13:1550308496216432781>   '   عدد الوحدات المتواجدة بالميدان . ( {config.MAX_ACTIVE_OFFICERS}/{count} ) **",
+        f"** <:emoji_13:1550308496216432781>︲عدد الوحدات المتواجدة بالميدان . ( {config.MAX_ACTIVE_OFFICERS}/{count} ) **",
         "",
     ]
     if not rows:
         description.append("")
-        description.append("-# ** <:emoji_21:1550309215162077214>   '   لايوجد عسكري في مدينة ملوك التأثير . **")
+        description.append("-# ** <:emoji_21:1550309215162077214>︲لايوجد عسكري في مدينة ' OLD KiNG's '. **")
     else:
         members = {member.id: member for member in guild.members}
         for row in rows:
@@ -65,7 +65,7 @@ async def build_duty_embed(guild: discord.Guild) -> discord.Embed:
             line = f"- {_mention(member, row[2], row[1])} {_rank_badge(member)}{_tokens(row, member)}".strip()
             description.append(line)
     return utils.base_embed(
-        "<:emoji_25:1550309714330390538> ︲ Effect Police ( Log In ) .",
+        "<:emoji_25:1550309714330390538>︲OLD Police ( Log In ) .",
         "\n".join(description),
         image_url=f"attachment://{config.LOGIN_BANNER_ASSET}",
         panel_key="login",
