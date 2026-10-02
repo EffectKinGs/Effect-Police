@@ -129,18 +129,16 @@ async def on_ready():
         from custom_embed import EmbedPanelView
         from mdt import MDTPanelView, RecordCheckPanelView
 
-        bot.add_view(LoginPanelView(expanded=False))
+   bot.add_view(LoginPanelView(expanded=False))
         bot.add_view(PointsPanelView())
         bot.add_view(UpgradePanelView())
         bot.add_view(LSPDControlView())
         bot.add_view(TicketActionsView())
         bot.add_view(SummonPanelView())
         bot.add_view(SubmissionPanelView())
-        bot.add_view(SubmissionReviewView())
         bot.add_view(EmbedPanelView())
         bot.add_view(MDTPanelView())
         bot.add_view(RecordCheckPanelView())
-
         ticket_types = await db.list_ticket_types()
 
         if ticket_types:
