@@ -19,15 +19,15 @@ def resolve_emojis(text: str, guild: discord.Guild) -> str:
         emoji = discord.utils.get(guild.emojis, name=name)
         return str(emoji) if emoji else match.group(0)
 
-    text = re.sub(r"<:([a-zA-Z0-9_]+):>", repl_simple, text)
-    text = re.sub(r"(?<!\w):([a-zA-Z0-9_]+):(?!\w)", repl_simple, text)
+    text = re.sub(r"<:([^:]+):>", repl_simple, text)
+    text = re.sub(r"(?<![\w<]):([^:\s]+):(?!\w)", repl_simple, text)
 
     def repl_full(match):
         name, emoji_id = match.group(1), int(match.group(2))
         emoji = discord.utils.get(guild.emojis, id=emoji_id, name=name)
         return str(emoji) if emoji else match.group(0)
 
-    text = re.sub(r"<a?:([a-zA-Z0-9_]+):(\d+)>", repl_full, text)
+    text = re.sub(r"<a?:([^:]+):(\d+)>", repl_full, text)
 
     return text
 
