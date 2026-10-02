@@ -137,13 +137,13 @@ class SubmissionReviewView(discord.ui.View):
 
         if accepted:
             description = (
-                "** <a:MTRP:1394930696535015576> - ادارة شرطة ايفل تاون تُبارك لك بقبولك . **\n"
+                "** <a:MTRP:1394930696535015576> - ادارة شرطة اولد كنق تُبارك لك بقبولك . **\n"
                 "** <a:MTRP:1394920520134426636> - و مُتمنين لك التوفيق في التدريب العسكري القادم . **"
             )
             result_embed = utils.base_embed("Accept", description, image_url="")
         else:
             description = (
-                "   **<a:MTRP:1394930696535015576> - أدارة شرطة ايفل تاون تود ابلاغك برفض طلبك **\n"
+                "   **<a:MTRP:1394930696535015576> - أدارة شرطة اولد كنق تود ابلاغك برفض طلبك **\n"
                 "-# **<a:MTRP:1394920520134426636> - و مُتمنين لك التوفيق في المرات المُقبلة . **"
             )
             result_embed = utils.base_embed("Reject", description, image_url="")
@@ -195,11 +195,11 @@ class Submits(commands.Cog):
             await db.set_setting(_REVIEW_CHANNEL_KEY.format(guild_id=interaction.guild.id), str(review_channel.id))
 
         description = (
-            "**<:emoji_5:1550307911115218974> - Welcome To The Effect King's Police Department Application "
+            "**<:emoji_5:1550307911115218974> - Welcome To The OLD KiNG's Police Department Application "
             "Division, Where You Can Serve And Protect Your Nation While Leaving Your Mark Within Its Ranks .**"
         )
         embed = utils.base_embed(
-            "<:emoji_39:1550337741936394380>︲Effect Police ( SuBmits )",
+            "# <:emoji_39:1550337741936394380>︲OLd KInG Police ( SuBmits )",
             description,
             image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
         )
