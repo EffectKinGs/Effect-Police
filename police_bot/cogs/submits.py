@@ -12,6 +12,7 @@ import utils
 
 _MENTION_RE = re.compile(r"<@!?(\d+)>")
 _REVIEW_CHANNEL_KEY = "submits_review_channel_id:{guild_id}"
+_EXPERIENCE_EMOJI = "<:1DoT3:1555552114993008670>"
 
 
 def _can_review(member: discord.Member) -> bool:
@@ -26,27 +27,29 @@ async def _get_review_channel(guild: discord.Guild) -> discord.TextChannel | Non
     return channel if isinstance(channel, discord.TextChannel) else None
 
 
-def _build_application_layout(applicant: discord.Member, name: str, age: str, experience: str, image_url: str | None) -> discord.ui.LayoutView:
+def _format_experience(experience: str) -> str:
+    lines = [line.strip() for line in experience.splitlines() if line.strip()]
+    if not lines:
+        return experience
+    return "\n".join(f"{_EXPERIENCE_EMOJI} {line}" for line in lines)
+
+
+def _build_application_layout(applicant: discord.Member, name: str, age: str, experience: str) -> discord.ui.LayoutView:
     container = discord.ui.Container(accent_color=config.EMBED_COLOR)
     container.add_item(discord.ui.TextDisplay(f"|| <@&1511976724240535704> || {applicant.mention}"))
-    container.add_item(discord.ui.TextDisplay("# <:emoji_39:1550337741936394380>︲OLd KInG Police ( SuBmits )"))
     container.add_item(discord.ui.Separator())
+    container.add_item(discord.ui.TextDisplay("# <:emoji_39:1550337741936394380>︲OLd KInG Police ( SuBmits )"))
     container.add_item(discord.ui.TextDisplay(
         "**"
-        "<:emoji_9:1550308305014882344>︲NaME :\n"
+        f"<:emoji_9:1550308305014882344>︲NaME : {name}\n"
         "-# Name / الاسم\n"
-        f"{name}\n"
-        "<:emoji_13:1550308496216432781>︲AGE :\n"
+        f"<:emoji_13:1550308496216432781>︲AGE : {age}\n"
         "-# Age / العمر\n"
-        f"{age}\n"
         "<:emoji_27:1550309790163664906>︲ExperiEnce :\n"
         "-# Experience / الخبرات .\n"
-        f"{experience}"
+        f"{_format_experience(experience)}"
         "**"
     ))
-    if image_url:
-        container.add_item(discord.ui.Separator())
-        container.add_item(discord.ui.MediaGallery(discord.MediaGalleryItem(media=image_url)))
     layout = discord.ui.LayoutView(timeout=None)
     layout.add_item(container)
     layout.add_item(discord.ui.ActionRow(
@@ -82,8 +85,7 @@ class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( �
 
         await interaction.response.defer(ephemeral=True)
 
-        image_url = interaction.user.display_avatar.url
-        layout = _build_application_layout(interaction.user, name, age, experience, image_url)
+        layout = _build_application_layout(interaction.user, name, age, experience)
         target_channel = await _get_review_channel(interaction.guild) or interaction.channel
 
         try:
