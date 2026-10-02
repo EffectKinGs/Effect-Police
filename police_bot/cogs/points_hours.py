@@ -22,7 +22,7 @@ async def _check_point_view(member: discord.Member) -> discord.ui.LayoutView:
     total = session_total + int(hours * 3600)
 
     items: list[discord.ui.Item] = [
-        discord.ui.TextDisplay("# <:emoji_5:1550307911115218974>︲PoinTs RepoRt ."),
+        discord.ui.TextDisplay("# <:emoji_288:1555520227939188786>︲PoinTs RepoRt ."),
         discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
         discord.ui.TextDisplay(
             "\n".join(
@@ -41,7 +41,7 @@ async def _top10_view(guild: discord.Guild) -> discord.ui.LayoutView:
     rows = await db.top_points_hours(10)
 
     items: list[discord.ui.Item] = [
-        discord.ui.TextDisplay("# <:emoji_17:1550308884852383805> ︲ToP10 ."),
+        discord.ui.TextDisplay("# <:emoji_17:1550308884852383805>︲ToP10 ."),
         discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
     ]
 
