@@ -38,15 +38,15 @@ def _build_application_container(applicant: discord.Member, name: str, age: str,
     container = discord.ui.Container(accent_color=config.EMBED_COLOR)
     container.add_item(discord.ui.TextDisplay(f"|| <@&1511976724240535704> || {applicant.mention}"))
     container.add_item(discord.ui.Separator())
-    container.add_item(discord.ui.TextDisplay("# <:emoji_39:1550337741936394380>︲OLd KInG Police ( SuBmits )"))
+    container.add_item(discord.ui.TextDisplay("# <:emoji_14:1555505304584847392>︲OLd KInG ( SuBmits )"))
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
         "**"
-        f"<:emoji_9:1550308305014882344>︲NaME : {name}\n"
-        "-# Name / الاسم\n"
-        f"<:emoji_13:1550308496216432781>︲AGE : {age}\n"
-        "-# Age / العمر\n"
-        "<:emoji_27:1550309790163664906>︲ExperiEnce :\n"
+        f"<:emoji_9:1550308305014882344>︲NaME : {name}\n ."
+        "-# Name / الاسم .\n"
+        f"<:emoji_13:1550308496216432781>︲AGE : {age}\n ."
+        "-# Age / العمر .\n"
+        "<:emoji_27:1550309790163664906>︲ExperiEnce :\n ."
         "-# Experience / الخبرات .\n"
         f"{_format_experience(experience)}"
         "**"
