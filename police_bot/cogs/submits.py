@@ -26,8 +26,9 @@ async def _get_review_channel(guild: discord.Guild) -> discord.TextChannel | Non
     return channel if isinstance(channel, discord.TextChannel) else None
 
 
-def _build_application_layout(name: str, age: str, experience: str, image_url: str | None) -> discord.ui.LayoutView:
+def _build_application_layout(applicant: discord.Member, name: str, age: str, experience: str, image_url: str | None) -> discord.ui.LayoutView:
     container = discord.ui.Container(accent_color=config.EMBED_COLOR)
+    container.add_item(discord.ui.TextDisplay(f"|| <@&1511976724240535704> || {applicant.mention}"))
     container.add_item(discord.ui.TextDisplay("# <:emoji_39:1550337741936394380>︲OLd KInG Police ( SuBmits )"))
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
@@ -82,17 +83,16 @@ class SubmitModal(discord.ui.Modal, title="𝗘𝘃𝗶𝗹𝗧𝗼𝘄𝗻 ( �
         await interaction.response.defer(ephemeral=True)
 
         image_url = interaction.user.display_avatar.url
-        layout = _build_application_layout(name, age, experience, image_url)
+        layout = _build_application_layout(interaction.user, name, age, experience, image_url)
         target_channel = await _get_review_channel(interaction.guild) or interaction.channel
 
         try:
             await target_channel.send(
-                content=f"|| <@&1511976724240535704> || {interaction.user.mention}",
                 view=layout,
                 allowed_mentions=discord.AllowedMentions(users=True, roles=True),
             )
-        except (discord.Forbidden, discord.HTTPException):
-            await interaction.followup.send(" تعذر إرسال طلبك، حاول لاحقًا.", ephemeral=True)
+        except Exception as exc:
+            await interaction.followup.send(f"ERROR: {type(exc).__name__}: {exc}", ephemeral=True)
             return
 
         pending_role = interaction.guild.get_role(config.SUBMISSION_PENDING_ROLE_ID)
