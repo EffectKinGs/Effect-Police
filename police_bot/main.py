@@ -125,11 +125,11 @@ async def on_ready():
         from tickets import TicketActionsView, TicketPanelView, UpgradePanelView
         from control_panel import LSPDControlView
         from summon_panel import SummonPanelView
-        from submits import SubmissionPanelView, SubmissionReviewView
+        from submits import SubmissionPanelView
         from custom_embed import EmbedPanelView
         from mdt import MDTPanelView, RecordCheckPanelView
 
-   bot.add_view(LoginPanelView(expanded=False))
+        bot.add_view(LoginPanelView(expanded=False))
         bot.add_view(PointsPanelView())
         bot.add_view(UpgradePanelView())
         bot.add_view(LSPDControlView())
@@ -139,6 +139,7 @@ async def on_ready():
         bot.add_view(EmbedPanelView())
         bot.add_view(MDTPanelView())
         bot.add_view(RecordCheckPanelView())
+
         ticket_types = await db.list_ticket_types()
 
         if ticket_types:
