@@ -94,9 +94,9 @@ async def create_ticket_channel(
     )
 
     embed = utils.base_embed(
-        f"🎫 Ticket {ticket_number} ( {type_label} )",
-        "اشرح طلبك بالتفصيل، وسيتم الرد عليك من فريق الدعم. "
-        "صاحب التذكرة لا يستطيع استلامها أو إغلاقها.",
+        f"",
+        "-# ** <:1OL_1ruless:1556050594471612517> - قم بشرح مُشكلتك وانتظر المسوؤلِ يتجاوبو معك . **"
+        "",
         image_url="",
     )
 
@@ -137,10 +137,10 @@ class TicketActionsView(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(
-        label="استلام التذكرة",
+        label="Claim",
         style=discord.ButtonStyle.success,
         custom_id="ticket:claim",
-        emoji="📌",
+        emoji="<:emoji_14:1555506715946909869>",
     )
     async def claim_ticket(
         self,
@@ -160,7 +160,7 @@ class TicketActionsView(discord.ui.View):
         owner_id = await _ticket_owner(interaction.channel.id)
         if owner_id == interaction.user.id:
             await interaction.response.send_message(
-                "❌ لا يمكنك استلام تذكرتك.",
+                "-# **<:emoji_28:1555508053988876309> - انت مستلم التذكرة بالفعل !**",
                 ephemeral=True,
             )
             return
@@ -175,7 +175,7 @@ class TicketActionsView(discord.ui.View):
 
         if not utils.is_system_admin(interaction.user) and not is_support:
             await interaction.response.send_message(
-                "❌ هذا الزر مخصص لفريق الدعم.",
+                "-# **<a:amazen:1555520318003609612> -  لاتوجد لديك صلاحية **",
                 ephemeral=True,
             )
             return
@@ -185,7 +185,7 @@ class TicketActionsView(discord.ui.View):
         )
         if current:
             await interaction.response.send_message(
-                f"❌ التذكرة مستلمة بالفعل من <@{current}>.",
+                f"-# **<a:MTRP:1550940537492865124> - التذكرة مُستلمة بالفعل من <@{current}>.**",
                 ephemeral=True,
             )
             return
@@ -201,14 +201,14 @@ class TicketActionsView(discord.ui.View):
         )
 
         await interaction.response.send_message(
-            f"✅ تم استلام التذكرة بواسطة {interaction.user.mention}."
+            f"-# **<a:STRP:1550940475819687970> - تم استلام التذكرة بواسطة {interaction.user.mention}. **"
         )
 
     @discord.ui.button(
-        label="التخلي عن التذكرة",
+        label="Abandon Ticket",
         style=discord.ButtonStyle.secondary,
         custom_id="ticket:unclaim",
-        emoji="📤",
+        emoji="<:emoji_12:1550308402520133632>",
     )
     async def unclaim_ticket(
         self,
@@ -230,14 +230,14 @@ class TicketActionsView(discord.ui.View):
         )
         if not current:
             await interaction.response.send_message(
-                "❌ التذكرة غير مستلمة.",
+                "-# **<a:MTRP:1555504111011504138> - التذكرة غير مُستلمه **",
                 ephemeral=True,
             )
             return
 
         if int(current) != interaction.user.id and not utils.is_system_admin(interaction.user):
             await interaction.response.send_message(
-                f"❌ التذكرة مستلمة من <@{current}> ولا تقدر تتخلى عنها.",
+                f"-# **<a:MTRP:1550940537492865124> - التذكرة مُستلمة بالفعل من <@{current}>.**",
                 ephemeral=True,
             )
             return
@@ -253,14 +253,14 @@ class TicketActionsView(discord.ui.View):
         )
 
         await interaction.response.send_message(
-            f"📤 تم التخلي عن التذكرة بواسطة {interaction.user.mention}."
+            f"-# **<:emoji_13:1550308496216432781> - تم التخلي من  التذكرة بواسطة {interaction.user.mention} **"
         )
 
     @discord.ui.button(
-        label="إغلاق التذكرة",
+        label="Close",
         style=discord.ButtonStyle.danger,
         custom_id="ticket:close",
-        emoji="🔒",
+        emoji="<:emoji_21:1550309452085731498>",
     )
     async def close_ticket(
         self,
@@ -280,7 +280,7 @@ class TicketActionsView(discord.ui.View):
         owner_id = await _ticket_owner(interaction.channel.id)
         if owner_id == interaction.user.id:
             await interaction.response.send_message(
-                "❌ لا يمكنك إغلاق تذكرتك.",
+                "-# **<a:amazen:1555520318003609612> -  لاتوجد لديك صلاحية **",
                 ephemeral=True,
             )
             return
@@ -291,7 +291,7 @@ class TicketActionsView(discord.ui.View):
         is_assigned = assigned and int(assigned) == interaction.user.id
         if not utils.is_system_admin(interaction.user) and not is_assigned:
             await interaction.response.send_message(
-                "❌ يجب أن تكون مستلم التذكرة أو تملك صلاحية النظام كاملة.",
+                "-# **<a:amazen:1555520318003609612> -  لاتوجد لديك صلاحية **",
                 ephemeral=True,
             )
             return
@@ -304,7 +304,7 @@ class TicketActionsView(discord.ui.View):
 
         close_embed = utils.base_embed(
             "Ticket Closed",
-            "سيتم إغلاق التذكرة بعد خمس ثواني.",
+            "-# **<:emoji_28:1550309826758840500> - سيتم اغلاق التذكرة بعد 5 ثوانِ . **",
             image_url="",
         )
 
@@ -356,7 +356,7 @@ class TicketSelect(discord.ui.Select):
             role_id,
         )
         await interaction.followup.send(
-            f"✅ تم إنشاء تذكرتك: {channel.mention}",
+            f" تم إنشاء تذكرتك: {channel.mention}",
             ephemeral=True,
         )
 
