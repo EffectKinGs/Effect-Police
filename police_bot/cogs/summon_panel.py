@@ -214,8 +214,8 @@ class SummonPanel(commands.Cog):
             return
 
         await interaction.response.defer(ephemeral=True)
-        description = "**<:ETRP_97:1500190884442931271> - Use the buttons below to summon personnel.**"
-        embed = utils.base_embed("OLD KING's ( Summon )", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
+        description = "**<:emoji_21:1550309452085731498> - Use the buttons below to summon personnel.**"
+        embed = utils.base_embed("<a:emoji_41:1555519228046479441>︲OLD KING's ( Summon )", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
         await utils.send_panel(interaction.channel, embed, SummonPanelView(), config.PANEL_BANNER_ASSET)
         await db.set_setting(f"summon_panel_channel_id:{interaction.guild.id}", str(interaction.channel.id))
         await utils.send_log(
