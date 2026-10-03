@@ -115,7 +115,7 @@ async def on_ready():
     await bot.change_presence(
         status=discord.Status.online,
         activity=discord.Game(
-            name="Programmed By SaadEx"
+            name="𝗧𝗵𝗶𝘀 𝗕𝗼𝘁 𝗜𝘀 𝗙𝗼𝗿 𝗢𝗹𝗱 𝗞𝗶𝗻𝗴 | 𝗗𝗲𝘃𝗕𝘆 : 𝗶𝗖𝗼𝗡𝗶𝗰𝗦𝗮𝗮𝗱 "
         )
     )
 
