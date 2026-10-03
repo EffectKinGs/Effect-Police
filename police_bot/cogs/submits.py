@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import re
-
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -10,221 +8,220 @@ import config
 import database as db
 import utils
 
-_MENTION_RE = re.compile(r"<@!?(\d+)>")
-_REVIEW_CHANNEL_KEY = "submits_review_channel_id:{guild_id}"
-_EXPERIENCE_EMOJI = "<:1DoT3:1555552114993008670>"
+GENERAL_CALL_ROLE_ID = int(
+    getattr(config, "GENERAL_CALL_ROLE_ID", 0)
+    or getattr(config, "LSPD_BASE_ROLE_ID", 0)
+    or 1542128316285460481
+)
+
+_SUMMON_BANNER = "old_king_panel_banner.png"
 
 
-def _can_review(member: discord.Member) -> bool:
-    return utils.has_any_role(member, config.SUBMISSION_REVIEW_ROLE_IDS)
+def _summon_files() -> list[discord.File]:
+    return [discord.File(_SUMMON_BANNER, filename=_SUMMON_BANNER)]
 
 
-async def _get_review_channel(guild: discord.Guild) -> discord.TextChannel | None:
-    channel_id = await db.get_setting(_REVIEW_CHANNEL_KEY.format(guild_id=guild.id))
-    if not channel_id:
-        return None
-    channel = guild.get_channel(int(channel_id))
-    return channel if isinstance(channel, discord.TextChannel) else None
-
-
-def _format_experience(experience: str) -> str:
-    lines = [line.strip() for line in experience.splitlines() if line.strip()]
-    if not lines:
-        return experience
-    return "\n".join(f"{_EXPERIENCE_EMOJI} {line}" for line in lines)
-
-
-def _build_application_container(applicant: discord.Member, name: str, age: str, experience: str) -> discord.ui.Container:
+def _summon_layout(summoner: discord.abc.User, reason: str | None = None) -> discord.ui.LayoutView:
+    reason_line = (reason or "").strip() or "—"
     container = discord.ui.Container(accent_color=config.EMBED_COLOR)
-    container.add_item(discord.ui.TextDisplay(f"|| <@&1511976724240535704> || {applicant.mention}"))
-    container.add_item(discord.ui.Separator())
-    container.add_item(discord.ui.TextDisplay("# <:emoji_14:1555505304584847392>︲OLd KInG ( SuBmits )"))
+    container.add_item(discord.ui.TextDisplay("# <:emoji_288:1382777303196631130>︲OLd KinG’s ( SumMon )"))
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
         "**"
-        f"<:emoji_9:1550308305014882344>︲NaME : {name}\n"
-        "-# Name / الاسم .\n"
-        f"<:emoji_13:1550308496216432781>︲AGE : {age}\n"
-        "-# Age / العمر .\n"
-        "<:emoji_27:1550309790163664906>︲ExperiEnce :\n"
-        "-# Experience / الخبرات .\n"
-        f"{_format_experience(experience)}"
+        f"<a:emoji_41:1550934952793612399>︲( {reason_line} )\n"
+        f"<:emoji_38:1550334422274801664>︲You Have Been Summoned By : ( {summoner.mention} )"
         "**"
     ))
-    return container
-
-
-def _build_result_layout(accepted: bool) -> discord.ui.LayoutView:
-    if accepted:
-        header = "# <:emoji_31:1550311895594963094>︲Application Accepted ."
-        body = (
-            "-# **<:emoji_288:1382777303196631130> - ادارة شرطة اولد كنق تُبارك لك بقبولك . **\n"
-            "-# **<a:MTRP:1555504111011504138> - و مُتمنين لك التوفيق في التدريب العسكري القادم . **"
-        )
-        color = 0x57F287
-    else:
-        header = "# <a:emoji_41:1555519228046479441>︲Application Rejected ."
-        body = (
-            "-# **<:emoji_28:1555508053988876309> - أدارة شرطة اولد كنق تود ابلاغك برفض طلبك **\n"
-            "-# **<a:MTRP:1550940537492865124> - و مُتمنين لك التوفيق في المرات المُقبلة . **"
-        )
-        color = 0xED4245
-
-    container = discord.ui.Container(accent_color=color)
-    container.add_item(discord.ui.TextDisplay(header))
     container.add_item(discord.ui.Separator())
-    container.add_item(discord.ui.TextDisplay(body))
-
+    container.add_item(discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"attachment://{_SUMMON_BANNER}")))
     layout = discord.ui.LayoutView(timeout=None)
     layout.add_item(container)
     return layout
 
 
-class SubmissionReviewView(discord.ui.LayoutView):
-    def __init__(self, applicant: discord.Member, name: str, age: str, experience: str):
-        super().__init__(timeout=None)
-        self.applicant_id = applicant.id
-
-        self.accept_button = discord.ui.Button(label="Accept", style=discord.ButtonStyle.success, custom_id=f"submits:accept:{applicant.id}")
-        self.reject_button = discord.ui.Button(label="Reject", style=discord.ButtonStyle.danger, custom_id=f"submits:reject:{applicant.id}")
-        self.accept_button.callback = self._accept
-        self.reject_button.callback = self._reject
-
-        self.add_item(_build_application_container(applicant, name, age, experience))
-        self.add_item(discord.ui.ActionRow(self.accept_button, self.reject_button))
-
-    async def _accept(self, interaction: discord.Interaction):
-        await self._resolve(interaction, accepted=True)
-
-    async def _reject(self, interaction: discord.Interaction):
-        await self._resolve(interaction, accepted=False)
-
-    async def _resolve(self, interaction: discord.Interaction, *, accepted: bool):
-        if interaction.guild is None or not isinstance(interaction.user, discord.Member) or not _can_review(interaction.user):
-            await interaction.response.send_message("❌ هذه اللوحة للمسؤولين فقط.", ephemeral=True)
-            return
-
-        applicant: discord.Member | None = interaction.guild.get_member(self.applicant_id)
-        if applicant is None:
-            try:
-                applicant = await interaction.guild.fetch_member(self.applicant_id)
-            except (discord.NotFound, discord.HTTPException):
-                applicant = None
-
-        await interaction.response.defer()
-
-        self.accept_button.disabled = True
-        self.reject_button.disabled = True
-        try:
-            await interaction.message.edit(view=self)
-        except discord.HTTPException:
-            pass
-
-        status_line = ("**<:ETRP_80:1500187130729730050>  '  Application Accepted .**" if accepted else " **<:ETRP_159:1542609122665435206>  '  Application Rejected . **") + f" By : {interaction.user.mention}"
-        if accepted:
-            await db.add_points(interaction.user.id, config.SUBMISSION_ACCEPT_POINTS)
-
-        if applicant is not None:
-            pending_role = interaction.guild.get_role(config.SUBMISSION_PENDING_ROLE_ID)
-            target_role_id = config.SUBMISSION_ACCEPTED_ROLE_ID if accepted else config.SUBMISSION_REJECTED_ROLE_ID
-            target_role = interaction.guild.get_role(target_role_id)
-            try:
-                if pending_role is not None and pending_role in applicant.roles:
-                    await applicant.remove_roles(pending_role, reason="Military application reviewed")
-                if target_role is not None:
-                    await applicant.add_roles(target_role, reason="Military application reviewed")
-            except discord.Forbidden:
-                status_line += "\n⚠️ تعذر تحديث رتب المتقدم (تأكد أن رتبة البوت أعلى من هذي الرتب)."
-
-        await interaction.followup.send(status_line)
-
-        result_layout = _build_result_layout(accepted)
-
-        if applicant is not None:
-            try:
-                await applicant.send(view=result_layout)
-            except (discord.Forbidden, discord.HTTPException):
-                await interaction.followup.send(
-                    f"⚠️ تعذر إرسال الخاص إلى {applicant.mention} (الخاص مقفل).",
-                    ephemeral=True,
-                )
-
-        await utils.send_log(
-            interaction.guild,
-            "submits",
-            "Application Accepted" if accepted else "Application Rejected",
-            applicant if applicant else self.applicant_id,
-            "Accept ( Button )" if accepted else "Reject ( Button )",
-            f"المُراجع : {interaction.user.mention} | النتيجة : {'قبول' if accepted else 'رفض'}",
-        )
+async def _dm_summon(member: discord.Member, layout: discord.ui.LayoutView):
+    await member.send(view=layout, files=_summon_files())
 
 
-class SubmitModal(discord.ui.Modal, title="OLD KInG's ( 𝗦𝘂𝗯𝗺𝗶𝘁𝘀 )"):
+async def _role_members_all(guild: discord.Guild, role: discord.Role) -> list[discord.Member]:
+    found: dict[int, discord.Member] = {m.id: m for m in role.members}
+    try:
+        async for member in guild.fetch_members(limit=None):
+            if role in member.roles:
+                found[member.id] = member
+    except discord.HTTPException:
+        pass
+    return list(found.values())
+
+
+def _can_summon(member: discord.Member) -> bool:
+    return utils.has_any_role(member, config.SUMMON_ROLE_IDS)
+
+
+def _resolve_general_role(guild: discord.Guild) -> discord.Role | None:
+    candidates = [
+        GENERAL_CALL_ROLE_ID,
+        getattr(config, "LSPD_BASE_ROLE_ID", 0),
+        getattr(config, "LSPD_OFFICERS_ROLE_ID", 0),
+    ]
+    seen: set[int] = set()
+    for rid in candidates:
+        rid = int(rid or 0)
+        if not rid or rid in seen:
+            continue
+        seen.add(rid)
+        role = guild.get_role(rid)
+        if role is not None:
+            return role
+    return None
+
+
+async def find_member(guild: discord.Guild, user_id_text: str) -> discord.Member | None:
+    user_id_text = user_id_text.strip()
+    if not user_id_text.isdigit() or len(user_id_text) < 15:
+        return None
+    user_id = int(user_id_text)
+    member = guild.get_member(user_id)
+    if member is not None:
+        return member
+    try:
+        return await guild.fetch_member(user_id)
+    except (discord.NotFound, discord.HTTPException):
+        return None
+
+
+class GeneralCallModal(discord.ui.Modal, title="𝗦𝘂𝗺𝗺𝗼𝗻 ( 𝗚𝗲𝗻𝗲𝗿𝗮𝗹 𝗖𝗮𝗹𝗹 )"):
     def __init__(self):
         super().__init__()
-        self.character_name = discord.ui.TextInput(placeholder="", required=True, max_length=80)
-        self.character_age = discord.ui.TextInput(placeholder="", required=True, max_length=3)
-        self.experience = discord.ui.TextInput(
-            placeholder="", required=True, max_length=1000, style=discord.TextStyle.paragraph,
+        self.reason = discord.ui.TextInput(
+            placeholder="", required=True, max_length=300, style=discord.TextStyle.paragraph,
         )
-        self.add_item(discord.ui.Label(text="Character Name / اسم الكركتر", component=self.character_name))
-        self.add_item(discord.ui.Label(text="Character Age / عمر الكركتر", component=self.character_age))
-        self.add_item(discord.ui.Label(text="Your Experience / خبراتك", component=self.experience))
+        self.add_item(discord.ui.Label(text="𝗥𝗲𝗮𝘀𝗼𝗻 / 𝗦𝗲𝗯𝗲𝗯", component=self.reason))
 
     async def on_submit(self, interaction: discord.Interaction):
-        if interaction.guild is None or not isinstance(interaction.channel, discord.TextChannel):
-            await interaction.response.send_message("هذه اللوحة تعمل داخل السيرفر فقط.", ephemeral=True)
+        if interaction.guild is None or not isinstance(interaction.user, discord.Member) or not _can_summon(interaction.user):
+            await interaction.response.send_message("❌ هذه اللوحة مخصصة للضباط والمسؤولين فقط.", ephemeral=True)
             return
 
-        name = str(self.character_name).strip()
-        age = str(self.character_age).strip()
-        experience = str(self.experience).strip()
-        if not all((name, age, experience)):
+        reason = str(self.reason).strip()
+        if not reason:
+            await interaction.response.send_message("يلزم كتابة السبب.", ephemeral=True)
+            return
+
+        await interaction.response.defer(ephemeral=True)
+        role = _resolve_general_role(interaction.guild)
+        if role is None:
+            await interaction.followup.send(
+                "⚠️ لم يتم العثور على رتبة الاستدعاء العام داخل السيرفر.\n"
+                f"المعرّف الحالي: `{GENERAL_CALL_ROLE_ID}`\n"
+                "أرسل لي آيدي الرتبة الصحيح من إعدادات السيرفر → Roles → انسخ ID.",
+                ephemeral=True,
+            )
+            return
+
+        members = await _role_members_all(interaction.guild, role)
+        members = [m for m in members if not m.bot]
+        if not members:
+            await interaction.followup.send("⚠️ ما فيه أعضاء يحملون هذه الرتبة حاليًا.", ephemeral=True)
+            return
+
+        sent, failed = 0, 0
+        for member in members:
+            layout = _summon_layout(interaction.user, reason)
+            try:
+                await _dm_summon(member, layout)
+                sent += 1
+            except (discord.Forbidden, discord.HTTPException):
+                failed += 1
+
+        await utils.send_log(
+            interaction.guild, "summon", "General Call Summon", interaction.user, "General Summon ( Button )",
+            f"الرتبة : {role.mention} | تم الإرسال : {sent} | فشل : {failed} | السبب : {reason}",
+        )
+        summary = f"✅ تم استدعاء {sent} من أصل {len(members)} بالخاص."
+        if failed:
+            summary += f" (فشل الإرسال لـ {failed}، الخاص مغلق غالبًا)"
+        await interaction.followup.send(summary, ephemeral=True)
+
+
+class SpecificPersonnelModal(discord.ui.Modal, title="𝗦𝘂𝗺𝗺𝗼𝗻 ( 𝗦𝗽𝗲𝗰𝗶𝗳𝗶𝗰 𝗣𝗲𝗿𝘀𝗼𝗻𝗻𝗲𝗹 )"):
+    def __init__(self):
+        super().__init__()
+        self.discord_user_id = discord.ui.TextInput(placeholder="", required=True, max_length=20)
+        self.reason = discord.ui.TextInput(
+            placeholder="", required=True, max_length=300, style=discord.TextStyle.paragraph,
+        )
+        self.add_item(discord.ui.Label(text="𝗗𝗶𝘀𝗰𝗼𝗿𝗱 𝗨𝘀𝗲𝗿 𝗜𝗗 .", component=self.discord_user_id))
+        self.add_item(discord.ui.Label(text="𝗥𝗲𝗮𝘀𝗼𝗻 / 𝗦𝗲𝗯𝗲𝗯", component=self.reason))
+
+    async def on_submit(self, interaction: discord.Interaction):
+        if interaction.guild is None or not isinstance(interaction.user, discord.Member) or not _can_summon(interaction.user):
+            await interaction.response.send_message("❌ هذه اللوحة مخصصة للضباط والمسؤولين فقط.", ephemeral=True)
+            return
+
+        user_id_text = str(self.discord_user_id).strip()
+        reason = str(self.reason).strip()
+        if not user_id_text or not reason:
             await interaction.response.send_message("يلزم تعبئة جميع الحقول.", ephemeral=True)
             return
 
         await interaction.response.defer(ephemeral=True)
-
-        review_view = SubmissionReviewView(interaction.user, name, age, experience)
-        target_channel = await _get_review_channel(interaction.guild) or interaction.channel
-
-        try:
-            await target_channel.send(
-                view=review_view,
-                allowed_mentions=discord.AllowedMentions(users=True, roles=True),
-            )
-        except Exception as exc:
-            await interaction.followup.send(f"ERROR: {type(exc).__name__}: {exc}", ephemeral=True)
+        member = await find_member(interaction.guild, user_id_text)
+        if member is None:
+            await interaction.followup.send("❌ لم يتم العثور على هذا العضو داخل السيرفر.", ephemeral=True)
             return
 
-        pending_role = interaction.guild.get_role(config.SUBMISSION_PENDING_ROLE_ID)
-        if pending_role is not None and isinstance(interaction.user, discord.Member):
-            try:
-                await interaction.user.add_roles(pending_role, reason="Military application submitted")
-            except discord.Forbidden:
-                pass
+        layout = _summon_layout(interaction.user, reason)
+        try:
+            await _dm_summon(member, layout)
+        except (discord.Forbidden, discord.HTTPException):
+            await interaction.followup.send(f"⚠️ تعذر إرسال رسالة خاصة لـ {member.mention} (الخاص مغلق غالبًا).", ephemeral=True)
+            return
 
-        await interaction.followup.send("**<:emoji_12:1550308402520133632>︲Your Application Has Been Submitted. Please Be Patient . **", ephemeral=True)
+        await utils.send_log(
+            interaction.guild, "summon", "Specific Personnel Summon", interaction.user, "Specific Summon ( Button )",
+            f"المستدعى : {member.mention} | السبب : {reason}",
+        )
+        await interaction.followup.send(f"✅ تم استدعاء {member.mention} بالخاص.", ephemeral=True)
 
 
-class SubmissionPanelView(discord.ui.View):
+class SummonPanelView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Submits", style=discord.ButtonStyle.secondary, custom_id="submits_panel:open", emoji="<:emoji_19:1550309019938459761>")
-    async def open_submit(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_modal(SubmitModal())
+    @discord.ui.button(
+        label="General Call",
+        style=discord.ButtonStyle.secondary,
+        custom_id="summon_panel:general",
+        row=0,
+    )
+    async def general_call(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.guild is None or not isinstance(interaction.user, discord.Member) or not _can_summon(interaction.user):
+            await interaction.response.send_message("❌ هذه اللوحة مخصصة للضباط والمسؤولين فقط.", ephemeral=True)
+            return
+        await interaction.response.send_modal(GeneralCallModal())
+
+    @discord.ui.button(
+        label="Specific Personnel",
+        style=discord.ButtonStyle.secondary,
+        custom_id="summon_panel:specific",
+        row=0,
+    )
+    async def specific_personnel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.guild is None or not isinstance(interaction.user, discord.Member) or not _can_summon(interaction.user):
+            await interaction.response.send_message("❌ هذه اللوحة مخصصة للضباط والمسؤولين فقط.", ephemeral=True)
+            return
+        await interaction.response.send_modal(SpecificPersonnelModal())
 
 
-class Submits(commands.Cog):
+class SummonPanel(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="submits-panel", description="نشر لوحة التقديم على العسكرية في القناة الحالية")
-    @app_commands.describe(review_channel="القناة اللي تستقبل رسائل التقديمات (اختياري، الافتراضي نفس قناة اللوحة)")
+    @app_commands.command(name="summon-panel", description="نشر لوحة الاستدعاء (General Call / Specific Personnel)")
     @app_commands.default_permissions(administrator=True)
-    async def submits_panel(self, interaction: discord.Interaction, review_channel: discord.TextChannel = None):
-        if not isinstance(interaction.user, discord.Member) or not _can_review(interaction.user):
+    async def summon_panel(self, interaction: discord.Interaction):
+        if not utils.has_role(interaction.user, "admin") or interaction.guild is None:
             await interaction.response.send_message("❌ لا تملك صلاحية استخدام هذا الأمر.", ephemeral=True)
             return
         if not isinstance(interaction.channel, discord.TextChannel):
@@ -232,43 +229,16 @@ class Submits(commands.Cog):
             return
 
         await interaction.response.defer(ephemeral=True)
-        if review_channel is not None:
-            await db.set_setting(_REVIEW_CHANNEL_KEY.format(guild_id=interaction.guild.id), str(review_channel.id))
-
-        description = (
-            "**<:emoji_288:1555520227939188786> - Welcome To The OLD KiNG's Police Department Application "
-            "Division, Where You Can Serve And Protect Your Nation While Leaving Your Mark Within Its Ranks .**"
-        )
-        embed = utils.base_embed(
-            "# <:emoji_39:1550337741936394380>︲OLd KInG (SuBmits)",
-            description,
-            image_url=f"attachment://{config.PANEL_BANNER_ASSET}",
-        )
-        await utils.send_panel(interaction.channel, embed, SubmissionPanelView(), config.PANEL_BANNER_ASSET)
+        description = "**<:emoji_21:1550309452085731498> - Use the buttons below to summon personnel.**"
+        embed = utils.base_embed("<a:emoji_41:1555519228046479441>︲OLD KING's ( Summon )", description, image_url=f"attachment://{config.PANEL_BANNER_ASSET}")
+        await utils.send_panel(interaction.channel, embed, SummonPanelView(), config.PANEL_BANNER_ASSET)
+        await db.set_setting(f"summon_panel_channel_id:{interaction.guild.id}", str(interaction.channel.id))
         await utils.send_log(
-            interaction.guild, "submits", "Submits Panel", interaction.user, "/submits-panel",
-            f"القناة : {interaction.channel.mention} | قناة الاستقبال : {review_channel.mention if review_channel else 'نفس قناة اللوحة'}",
+            interaction.guild, "summon", "Summon Panel", interaction.user, "/summon-panel",
+            f"تم نشر اللوحة في {interaction.channel.mention}",
         )
         await interaction.delete_original_response()
 
-    @app_commands.command(name="set-submits-channel", description="تحديد قناة استقبال رسائل التقديم على العسكرية")
-    @app_commands.default_permissions(administrator=True)
-    async def set_submits_channel(self, interaction: discord.Interaction, channel: discord.TextChannel):
-        if not isinstance(interaction.user, discord.Member) or not _can_review(interaction.user):
-            await interaction.response.send_message("❌ لا تملك صلاحية استخدام هذا الأمر.", ephemeral=True)
-            return
-        if interaction.guild is None:
-            await interaction.response.send_message("هذا الأمر يعمل داخل السيرفر فقط.", ephemeral=True)
-            return
-
-        await interaction.response.defer(ephemeral=True)
-        await db.set_setting(_REVIEW_CHANNEL_KEY.format(guild_id=interaction.guild.id), str(channel.id))
-        await utils.send_log(
-            interaction.guild, "submits", "Submits Review Channel", interaction.user, "/set-submits-channel",
-            f"القناة الجديدة : {channel.mention}",
-        )
-        await interaction.followup.send(f"✅ صارت {channel.mention} قناة استقبال تقديمات العسكرية.", ephemeral=True)
-
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(Submits(bot))
+    await bot.add_cog(SummonPanel(bot))
