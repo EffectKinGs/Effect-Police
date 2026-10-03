@@ -18,8 +18,8 @@ GENERAL_CALL_ROLE_ID = int(
 def _summon_embed(summoner: discord.abc.User, reason: str | None = None) -> discord.Embed:
     reason_line = (reason or "").strip() or "—"
     description = (
-        f"** <:ETRP_97:1500190884442931271>  -  ( {reason_line} ) **\n\n"
-        f"** <:ETRP_141:1542161889038172180> - You Have Been Summoned By : ( {summoner.mention} ) **"
+        f"** <a:emoji_41:1550934952793612399> - ( {reason_line} ) **\n\n"
+        f"** <:emoji_38:1550334422274801664> - You Have Been Summoned By : ( {summoner.mention} ) **"
     )
     return utils.base_embed("Summon", description, image_url="")
 
