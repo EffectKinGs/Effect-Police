@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -14,11 +16,13 @@ GENERAL_CALL_ROLE_ID = int(
     or 1542128316285460481
 )
 
-_SUMMON_BANNER = "old_king_panel_banner.png"
+_ASSETS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets")
+_SUMMON_BANNER = os.path.join(_ASSETS_DIR, "old_king_panel_banner.png")
+_SUMMON_BANNER_NAME = "old_king_panel_banner.png"
 
 
 def _summon_files() -> list[discord.File]:
-    return [discord.File(_SUMMON_BANNER, filename=_SUMMON_BANNER)]
+    return [discord.File(_SUMMON_BANNER, filename=_SUMMON_BANNER_NAME)]
 
 
 def _summon_layout(summoner: discord.abc.User, reason: str | None = None) -> discord.ui.LayoutView:
@@ -33,7 +37,7 @@ def _summon_layout(summoner: discord.abc.User, reason: str | None = None) -> dis
         "**"
     ))
     container.add_item(discord.ui.Separator())
-    container.add_item(discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"attachment://{_SUMMON_BANNER}")))
+    container.add_item(discord.ui.MediaGallery(discord.MediaGalleryItem(media=f"attachment://{_SUMMON_BANNER_NAME}")))
     layout = discord.ui.LayoutView(timeout=None)
     layout.add_item(container)
     return layout
