@@ -18,7 +18,7 @@ GENERAL_CALL_ROLE_ID = int(
 def _summon_layout(summoner: discord.abc.User, reason: str | None = None) -> discord.ui.LayoutView:
     reason_line = (reason or "").strip() or "—"
     container = discord.ui.Container(accent_color=config.EMBED_COLOR)
-    container.add_item(discord.ui.TextDisplay("# <:emoji_288:1382777303196631130>︲OLd KinG’s ( SumMon )"))
+    container.add_item(discord.ui.TextDisplay("# <:emoji_288:1555520227939188786>︲OLd KinG’s ( SumMon )"))
     container.add_item(discord.ui.Separator())
     container.add_item(discord.ui.TextDisplay(
         "**"
