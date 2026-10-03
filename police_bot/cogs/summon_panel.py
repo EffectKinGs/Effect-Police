@@ -15,17 +15,24 @@ GENERAL_CALL_ROLE_ID = int(
 )
 
 
-def _summon_embed(summoner: discord.abc.User, reason: str | None = None) -> discord.Embed:
+def _summon_layout(summoner: discord.abc.User, reason: str | None = None) -> discord.ui.LayoutView:
     reason_line = (reason or "").strip() or "—"
-    description = (
-        f"-# **<a:emoji_41:1550934952793612399>︲( {reason_line} )**\n\n"
-        f"-# **<:emoji_38:1550334422274801664>︲You Have Been Summoned By : ( {summoner.mention} ) **"
-    )
-    return utils.base_embed("Summon", description, image_url="")
+    container = discord.ui.Container(accent_color=config.EMBED_COLOR)
+    container.add_item(discord.ui.TextDisplay("# <:emoji_288:1382777303196631130>︲OLd KinG’s ( SumMon )"))
+    container.add_item(discord.ui.Separator())
+    container.add_item(discord.ui.TextDisplay(
+        "**"
+        f"<a:emoji_41:1550934952793612399>︲( {reason_line} )\n"
+        f"<:emoji_38:1550334422274801664>︲You Have Been Summoned By : ( {summoner.mention} )"
+        "**"
+    ))
+    layout = discord.ui.LayoutView(timeout=None)
+    layout.add_item(container)
+    return layout
 
 
-async def _dm_summon(member: discord.Member, embed: discord.Embed):
-    await member.send(content=member.mention, embed=embed)
+async def _dm_summon(member: discord.Member, layout: discord.ui.LayoutView):
+    await member.send(view=layout)
 
 
 async def _role_members_all(guild: discord.Guild, role: discord.Role) -> list[discord.Member]:
@@ -110,11 +117,11 @@ class GeneralCallModal(discord.ui.Modal, title="𝗦𝘂𝗺𝗺𝗼𝗻 ( 𝗚�
             await interaction.followup.send("⚠️ ما فيه أعضاء يحملون هذه الرتبة حاليًا.", ephemeral=True)
             return
 
-        embed = _summon_embed(interaction.user, reason)
+        layout = _summon_layout(interaction.user, reason)
         sent, failed = 0, 0
         for member in members:
             try:
-                await _dm_summon(member, embed)
+                await _dm_summon(member, layout)
                 sent += 1
             except (discord.Forbidden, discord.HTTPException):
                 failed += 1
@@ -156,9 +163,9 @@ class SpecificPersonnelModal(discord.ui.Modal, title="𝗦𝘂𝗺𝗺𝗼𝗻 (
             await interaction.followup.send("❌ لم يتم العثور على هذا العضو داخل السيرفر.", ephemeral=True)
             return
 
-        embed = _summon_embed(interaction.user, reason)
+        layout = _summon_layout(interaction.user, reason)
         try:
-            await _dm_summon(member, embed)
+            await _dm_summon(member, layout)
         except (discord.Forbidden, discord.HTTPException):
             await interaction.followup.send(f"⚠️ تعذر إرسال رسالة خاصة لـ {member.mention} (الخاص مغلق غالبًا).", ephemeral=True)
             return
