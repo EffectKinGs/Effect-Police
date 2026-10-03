@@ -26,13 +26,27 @@ def _summon_layout(summoner: discord.abc.User, reason: str | None = None) -> dis
         f"<:emoji_38:1550334422274801664>︲You Have Been Summoned By : ( {summoner.mention} )"
         "**"
     ))
+    if utils.panel_file_exists(config.PANEL_BANNER_ASSET):
+        container.add_item(discord.ui.Separator())
+        container.add_item(
+            discord.ui.MediaGallery(
+                discord.MediaGalleryItem(
+                    media=f"attachment://{config.PANEL_BANNER_ASSET}"
+                )
+            )
+        )
     layout = discord.ui.LayoutView(timeout=None)
     layout.add_item(container)
     return layout
 
 
-async def _dm_summon(member: discord.Member, layout: discord.ui.LayoutView):
-    await member.send(view=layout)
+async def _dm_summon(member: discord.Member, summoner: discord.abc.User, reason: str):
+    layout = _summon_layout(summoner, reason)
+    file = utils.panel_asset(config.PANEL_BANNER_ASSET)
+    if file is None:
+        await member.send(view=layout)
+        return
+    await member.send(view=layout, file=file)
 
 
 async def _role_members_all(guild: discord.Guild, role: discord.Role) -> list[discord.Member]:
@@ -117,11 +131,10 @@ class GeneralCallModal(discord.ui.Modal, title="𝗦𝘂𝗺𝗺𝗼𝗻 ( 𝗚�
             await interaction.followup.send("⚠️ ما فيه أعضاء يحملون هذه الرتبة حاليًا.", ephemeral=True)
             return
 
-        layout = _summon_layout(interaction.user, reason)
         sent, failed = 0, 0
         for member in members:
             try:
-                await _dm_summon(member, layout)
+                await _dm_summon(member, interaction.user, reason)
                 sent += 1
             except (discord.Forbidden, discord.HTTPException):
                 failed += 1
@@ -163,9 +176,8 @@ class SpecificPersonnelModal(discord.ui.Modal, title="𝗦𝘂𝗺𝗺𝗼𝗻 (
             await interaction.followup.send("❌ لم يتم العثور على هذا العضو داخل السيرفر.", ephemeral=True)
             return
 
-        layout = _summon_layout(interaction.user, reason)
         try:
-            await _dm_summon(member, layout)
+            await _dm_summon(member, interaction.user, reason)
         except (discord.Forbidden, discord.HTTPException):
             await interaction.followup.send(f"⚠️ تعذر إرسال رسالة خاصة لـ {member.mention} (الخاص مغلق غالبًا).", ephemeral=True)
             return
